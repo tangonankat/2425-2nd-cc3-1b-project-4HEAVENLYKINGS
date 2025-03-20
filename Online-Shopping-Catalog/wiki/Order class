@@ -1,0 +1,9 @@
+class Order {
+    - int id
+    - Customer customer
+    - List<Product> items
+    - double totalPrice
+    - PaymentMethod paymentMethod
+    + placeOrder(): void
+    + cancelOrder(): void
+}
