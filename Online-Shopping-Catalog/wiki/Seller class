@@ -1,0 +1,6 @@
+class Seller {
+    - List<Product> products
+    + addProduct(p: Product): void
+    + updateProduct(p: Product, price: double, description: String, image: String): void
+    + removeProduct(p: Product): void
+}
