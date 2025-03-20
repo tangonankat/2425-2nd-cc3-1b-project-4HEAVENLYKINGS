@@ -1,0 +1,7 @@
+class Payment {
+    - int id
+    - Order order
+    - PaymentMethod paymentMethod
+    - String status
+    + processPayment(): boolean
+}
