@@ -1,0 +1,7 @@
+class Customer {
+    - String address
+    - Cart cart
+    + placeOrder(o: Order): void
+    + viewOrderHistory(): List<Order>
+    + addToCart(p: Product): void
+}
