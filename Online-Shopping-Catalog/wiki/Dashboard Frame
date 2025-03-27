@@ -1,0 +1,30 @@
+import javax.swing.*;
+import java.awt.*;
+
+public class DashboardFrame extends JFrame {
+    public DashboardFrame() {
+        // Window settings
+        setTitle("Dashboard");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        JLabel title = new JLabel("Welcome to the Dashboard", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+
+        JButton productButton = new JButton("Manage Products");
+        JButton orderButton = new JButton("View Orders");
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(productButton);
+        buttonPanel.add(orderButton);
+
+        add(title, BorderLayout.NORTH);
+        add(buttonPanel, BorderLayout.CENTER);
+
+        // Button actions
+        productButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Product Management coming soon!"));
+        orderButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Order History coming soon!"));
+    }
+}
