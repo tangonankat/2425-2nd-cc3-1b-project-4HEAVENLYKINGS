@@ -1,0 +1,60 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class LoginFrame extends JFrame {
+    private JTextField emailField;
+    private JPasswordField passwordField;
+
+    public LoginFrame() {
+        // Window settings
+        setTitle("Login");
+        setSize(400, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Labels and Fields
+        JLabel emailLabel = new JLabel("Email:");
+        emailField = new JTextField(15);
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordField = new JPasswordField(15);
+        JButton loginButton = new JButton("Login");
+
+        // Adding components
+        gbc.gridx = 0; gbc.gridy = 0;
+        add(emailLabel, gbc);
+        gbc.gridx = 1;
+        add(emailField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        add(passwordLabel, gbc);
+        gbc.gridx = 1;
+        add(passwordField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+        add(loginButton, gbc);
+
+        // Login button action
+        loginButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String email = emailField.getText();
+                String password = new String(passwordField.getPassword());
+
+                if (email.equals("admin@example.com") && password.equals("password")) {
+                    dispose(); // Close login window
+                    new DashboardFrame().setVisible(true); // Open dashboard
+                } else {
+                    JOptionPane.showMessageDialog(LoginFrame.this, "Invalid login!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
+    }
+}
