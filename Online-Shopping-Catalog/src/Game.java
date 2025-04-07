@@ -11,7 +11,7 @@ public class OnlineShoppingGUI {
     private DefaultListModel<String> cartModel;
     private List<Product> products;
     private List<Product> cart;
-    private String loggedInUser ;
+    private String loggedInUser  ;
     private List<User> users = new ArrayList<>();
 
     class User {
@@ -92,7 +92,7 @@ public class OnlineShoppingGUI {
             String password = new String(passField.getPassword());
             String role = (String) roleComboBox.getSelectedItem();
             if (authenticate(username, password, role)) {
-                loggedInUser  = username;
+                loggedInUser   = username;
                 loginFrame.dispose();
                 showMainScreen();
             } else {
@@ -190,7 +190,7 @@ public class OnlineShoppingGUI {
                 return;
             }
 
-            for (User  user : users) {
+            for (User   user : users) {
                 if (user.username.equals(username)) {
                     JOptionPane.showMessageDialog(registerFrame, "Username already exists!", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
@@ -239,7 +239,7 @@ public class OnlineShoppingGUI {
     }
 
     private boolean authenticate(String username, String password, String role) {
-        for (User  user : users) {
+        for (User   user : users) {
             if (user.username.equals(username) && user.password.equals(password) && user.role.equals(role)) {
                 return true;
             }
@@ -251,11 +251,13 @@ public class OnlineShoppingGUI {
         private int id;
         private String name;
         private double price;
+        private int stock;
 
-        public Product(int id, String name, double price) {
+        public Product(int id, String name, double price, int stock) {
             this.id = id;
             this.name = name;
             this.price = price;
+            this.stock = stock;
         }
 
         public int getId() {
@@ -270,8 +272,18 @@ public class OnlineShoppingGUI {
             return price;
         }
 
-        public void setPrice(double price) {
-            this.price = price;
+        public int getStock() {
+            return stock;
+        }
+
+        public void reduceStock() {
+            if (stock > 0) {
+                stock--;
+            }
+        }
+
+        private void setPrice(double parseDouble) {
+            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
         }
     }
 
@@ -279,12 +291,12 @@ public class OnlineShoppingGUI {
         products = new ArrayList<>();
         cart = new ArrayList<>();
 
-        // Sample products
-        products.add(new Product(101, "Laptop", 1200.00));
-        products.add(new Product(102, "Smartphone", 800.00));
+        // Sample products with stock levels
+        products.add(new Product(101, "Laptop", 1200.00, 5)); // 5 units in stock
+        products.add(new Product(102, "Smartphone", 800.00, 0)); // Out of stock
         // Add more products as needed...
 
-        User loggedIn = getUser (loggedInUser );
+        User loggedIn = getUser (loggedInUser  );
 
         frame = new JFrame("Online Shopping Catalog");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -363,7 +375,7 @@ public class OnlineShoppingGUI {
         dashboardPanel.add(dashboardContent);
 
         // Product Table
-        String[] columns = {"ID", "Name", "Price"};
+        String[] columns = {"ID", "Name", "Price", "Stock"};
         productTableModel = new DefaultTableModel(columns, 0);
         productTable = new JTable(productTableModel);
         loadProducts();
@@ -418,7 +430,7 @@ public class OnlineShoppingGUI {
                 if (p.getName().toLowerCase().contains(nameText)
                         && p.getPrice() >= min
                         && p.getPrice() <= max) {
-                    productTableModel.addRow(new Object[]{p.getId(), p.getName(), p.getPrice()});
+                    productTableModel.addRow(new Object[]{p.getId(), p.getName(), p.getPrice(), p.getStock()});
                 }
             }
         });
@@ -483,13 +495,16 @@ public class OnlineShoppingGUI {
         JTextField productNameField = new JTextField(15);
         JLabel productPriceLabel = new JLabel("Price:");
         JTextField productPriceField = new JTextField(15);
+        JLabel productStockLabel = new JLabel("Stock:");
+        JTextField productStockField = new JTextField(15);
         JButton addButton = new JButton("Add Product");
 
         addButton.addActionListener(e -> {
             String name = productNameField.getText();
             double price = Double.parseDouble(productPriceField.getText());
+            int stock = Integer.parseInt(productStockField.getText());
 
-            products.add(new Product(products.size() + 1, name, price));
+            products.add(new Product(products.size() + 1, name, price, stock));
             loadProducts();
             JOptionPane.showMessageDialog(addProductFrame, "Product added successfully!");
             addProductFrame.dispose();
@@ -509,6 +524,12 @@ public class OnlineShoppingGUI {
 
         gbc.gridx = 0;
         gbc.gridy = 2;
+        panel.add(productStockLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(productStockField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         gbc.gridwidth = 2;
         panel.add(addButton, gbc);
 
@@ -563,7 +584,7 @@ public class OnlineShoppingGUI {
         for (Product product : products) {
             // Format the price with a dollar sign
             String formattedPrice = String.format("$%.2f", product.getPrice());
-            productTableModel.addRow(new Object[]{product.getId(), product.getName(), formattedPrice});
+            productTableModel.addRow(new Object[]{product.getId(), product.getName(), formattedPrice, product.getStock()});
         }
     }
 
@@ -571,8 +592,14 @@ public class OnlineShoppingGUI {
         int selectedRow = productTable.getSelectedRow();
         if (selectedRow >= 0) {
             Product selectedProduct = products.get(selectedRow);
-            cart.add(selectedProduct);
-            cartModel.addElement(selectedProduct.getName());
+            if (selectedProduct.getStock() > 0) {
+                cart.add(selectedProduct);
+                cartModel.addElement(selectedProduct.getName());
+                selectedProduct.reduceStock();
+                JOptionPane.showMessageDialog(frame, selectedProduct.getName() + " added to cart.");
+            } else {
+                JOptionPane.showMessageDialog(frame, "This product is out of stock and cannot be added to the cart.", "Out of Stock", JOptionPane.WARNING_MESSAGE);
+            }
         } else {
             JOptionPane.showMessageDialog(frame, "Please select a product to add to the cart", "Error", JOptionPane.ERROR_MESSAGE);
         }
@@ -617,7 +644,7 @@ public class OnlineShoppingGUI {
     }
 
     private User getUser (String username) {
-        for (User  user : users) {
+        for (User   user : users) {
             if (user.username.equals(username)) {
                 return user;
             }
