@@ -64,7 +64,6 @@ public class OnlineShoppingGUI {
         passLabel.setForeground(Color.BLACK);
         JPasswordField passField = new JPasswordField(10);
 
-        // Add a checkbox to show/hide password
         JCheckBox showPasswordCheckBox = new JCheckBox("Show Password");
         showPasswordCheckBox.setBackground(new Color(173, 216, 230));
         showPasswordCheckBox.addActionListener(e -> {
@@ -76,7 +75,7 @@ public class OnlineShoppingGUI {
         });
 
         JLabel roleLabel = new JLabel("Role:");
-        String[] roles = {"Customer", "Admin"};
+        String[] roles = {"Customer", "Admin", "Seller"};
         JComboBox<String> roleComboBox = new JComboBox<>(roles);
 
         JButton loginButton = new JButton("Login");
@@ -121,7 +120,6 @@ public class OnlineShoppingGUI {
         gbc.gridx = 1;
         panel.add(passField, gbc);
 
-        // Add the checkbox for showing password
         gbc.gridx = 1;
         gbc.gridy = 3;
         panel.add(showPasswordCheckBox, gbc);
@@ -164,10 +162,9 @@ public class OnlineShoppingGUI {
         JLabel passLabel = new JLabel("Password:");
         JPasswordField passField = new JPasswordField(10);
         JLabel roleLabel = new JLabel("Role:");
-        String[] roles = {"Customer", "Admin"};
+        String[] roles = {"Customer", "Admin", "Seller"};
         JComboBox<String> roleComboBox = new JComboBox<>(roles);
 
-        // Add a checkbox to show/hide password
         JCheckBox showPasswordCheckBox = new JCheckBox("Show Password");
         showPasswordCheckBox.setBackground(new Color(224, 255, 255));
         showPasswordCheckBox.addActionListener(e -> {
@@ -221,7 +218,6 @@ public class OnlineShoppingGUI {
         gbc.gridx = 1;
         panel.add(passField, gbc);
 
-        // Add the checkbox for showing password
         gbc.gridx = 1;
         gbc.gridy++;
         panel.add(showPasswordCheckBox, gbc);
@@ -272,6 +268,10 @@ public class OnlineShoppingGUI {
         public double getPrice() {
             return price;
         }
+
+        public void setPrice(double price) {
+            this.price = price;
+        }
     }
 
     private void showMainScreen() {
@@ -310,7 +310,6 @@ public class OnlineShoppingGUI {
         extraInfoPanel.add(new JLabel("This is additional profile info"));
 
         toggleButton.addActionListener(e -> {
-            // Simple animation effect for showing/hiding additional information
             if (extraInfoPanel.isVisible()) {
                 extraInfoPanel.setVisible(false);
                 toggleButton.setText("Show More Info");
@@ -323,6 +322,20 @@ public class OnlineShoppingGUI {
         profilePanel.add(toggleButton);
         profilePanel.add(extraInfoPanel);
         tabbedPane.addTab("Profile", profilePanel);
+
+        // Seller options (if the logged-in user is a seller)
+        if (loggedIn.role.equals("Seller")) {
+            JPanel sellerPanel = new JPanel();
+            JButton addProductButton = new JButton("Add Product");
+            JButton modifyPriceButton = new JButton("Modify Product Price");
+
+            addProductButton.addActionListener(e -> showAddProductScreen());
+            modifyPriceButton.addActionListener(e -> showModifyPriceScreen());
+
+            sellerPanel.add(addProductButton);
+            sellerPanel.add(modifyPriceButton);
+            tabbedPane.addTab("Seller Options", sellerPanel);
+        }
 
         // Other panels...
         JPanel addressPanel = new JPanel();
@@ -369,34 +382,113 @@ public class OnlineShoppingGUI {
         frame.setVisible(true);
     }
 
+    // Show Add Product Screen for sellers
+    private void showAddProductScreen() {
+        JFrame addProductFrame = new JFrame("Add Product");
+        addProductFrame.setSize(300, 200);
+        addProductFrame.setLayout(new BorderLayout());
+        addProductFrame.getContentPane().setBackground(new Color(255, 255, 224));
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel productNameLabel = new JLabel("Product Name:");
+        JTextField productNameField = new JTextField(15);
+        JLabel productPriceLabel = new JLabel("Price:");
+        JTextField productPriceField = new JTextField(15);
+        JButton addButton = new JButton("Add Product");
+
+        addButton.addActionListener(e -> {
+            String name = productNameField.getText();
+            double price = Double.parseDouble(productPriceField.getText());
+
+            products.add(new Product(products.size() + 1, name, price));
+            loadProducts();
+            JOptionPane.showMessageDialog(addProductFrame, "Product added successfully!");
+            addProductFrame.dispose();
+        });
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(productNameLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(productNameField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(productPriceLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(productPriceField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        panel.add(addButton, gbc);
+
+        addProductFrame.add(panel, BorderLayout.CENTER);
+        addProductFrame.setVisible(true);
+    }
+
+    // Show Modify Price Screen for sellers
+    private void showModifyPriceScreen() {
+        String[] options = new String[products.size()];
+        for (int i = 0; i < products.size(); i++) {
+            options[i] = products.get(i).getName();
+        }
+
+        String selectedProduct = (String) JOptionPane.showInputDialog(frame, "Select Product to Modify Price",
+                "Modify Price", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        if (selectedProduct != null) {
+            for (Product product : products) {
+                if (product.getName().equals(selectedProduct)) {
+                    String newPrice = JOptionPane.showInputDialog(frame, "Enter new price for " + product.getName());
+                    try {
+                        product.setPrice(Double.parseDouble(newPrice));
+                        loadProducts();
+                        JOptionPane.showMessageDialog(frame, "Price updated successfully!");
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(frame, "Invalid price format!", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    // Helper methods to add products to the table and cart
+    private void loadProducts() {
+        productTableModel.setRowCount(0);  // Clear existing table rows
+        for (Product product : products) {
+            productTableModel.addRow(new Object[]{product.getId(), product.getName(), product.getPrice()});
+        }
+    }
+
     private void addToCart() {
         int selectedRow = productTable.getSelectedRow();
-        if (selectedRow != -1) {
-            Product product = products.get(selectedRow);
-            cart.add(product);
-            cartModel.addElement(product.getName() + " - $" + product.getPrice());
+        if (selectedRow >= 0) {
+            Product selectedProduct = products.get(selectedRow);
+            cart.add(selectedProduct);
+            cartModel.addElement(selectedProduct.getName());
+        } else {
+            JOptionPane.showMessageDialog(frame, "Please select a product to add to the cart", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void checkout() {
         if (cart.isEmpty()) {
-            JOptionPane.showMessageDialog(frame, "Your cart is empty!");
-            return;
-        }
-        String[] options = {"Cash on Delivery", "Online Payment (Debit/Credit Card)"};
-        int choice = JOptionPane.showOptionDialog(frame, "Select Payment Method:", "Payment",
-                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
-
-        if (choice != -1) {
-            JOptionPane.showMessageDialog(frame, "Checkout successful!");
-            cart.clear();
-            cartModel.clear();
-        }
-    }
-
-    private void loadProducts() {
-        for (Product product : products) {
-            productTableModel.addRow(new Object[]{product.getId(), product.getName(), product.getPrice()});
+            JOptionPane.showMessageDialog(frame, "Your cart is empty!", "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            double total = 0;
+            StringBuilder receipt = new StringBuilder("Receipt:\n");
+            for (Product product : cart) {
+                receipt.append(product.getName()).append(" - ").append(product.getPrice()).append("\n");
+                total += product.getPrice();
+            }
+            receipt.append("\nTotal: ").append(total);
+            JOptionPane.showMessageDialog(frame, receipt.toString(), "Checkout", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -406,10 +498,10 @@ public class OnlineShoppingGUI {
                 return user;
             }
         }
-        return null; // User not found
+        return null;
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(OnlineShoppingGUI::new);
+        SwingUtilities.invokeLater(() -> new OnlineShoppingGUI());
     }
 }
