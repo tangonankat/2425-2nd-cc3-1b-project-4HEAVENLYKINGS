@@ -283,13 +283,57 @@ public class OnlineShoppingGUI {
         products.add(new Product(103, "Headphones", 150.0));
         products.add(new Product(104, "Smartwatch", 200.0));
         products.add(new Product(105, "Tablet", 600.0));
+        products.add(new Product(106, "Bluetooth Speaker", 90.0));
+        products.add(new Product(107, "Gaming Mouse", 45.0));
+        products.add(new Product(108, "Mechanical Keyboard", 100.0));
+        products.add(new Product(109, "HD Monitor", 250.0));
+        products.add(new Product(110, "External Hard Drive", 110.0));
+        products.add(new Product(111, "Flash Drive", 20.0));
+        products.add(new Product(112, "Graphics Card", 500.0));
+        products.add(new Product(113, "Power Bank", 40.0));
+        products.add(new Product(114, "Webcam", 75.0));
+        products.add(new Product(115, "WiFi Router", 60.0));
+        products.add(new Product(116, "Projector", 300.0));
+        products.add(new Product(117, "Portable SSD", 150.0));
+        products.add(new Product(118, "Action Camera", 220.0));
+        products.add(new Product(119, "DSLR Camera", 900.0));
+        products.add(new Product(120, "Microwave Oven", 180.0));
+        products.add(new Product(121, "Air Fryer", 120.0));
+        products.add(new Product(122, "Blender", 80.0));
+        products.add(new Product(123, "Coffee Maker", 95.0));
+        products.add(new Product(124, "Electric Kettle", 40.0));
+        products.add(new Product(125, "Rice Cooker", 70.0));
+        products.add(new Product(126, "Smart TV", 1000.0));
+        products.add(new Product(127, "Washing Machine", 750.0));
+        products.add(new Product(128, "Refrigerator", 900.0));
+        products.add(new Product(129, "Air Conditioner", 1100.0));
+        products.add(new Product(130, "Electric Fan", 50.0));
+        products.add(new Product(131, "Desk Lamp", 25.0));
+        products.add(new Product(132, "Office Chair", 160.0));
+        products.add(new Product(133, "Standing Desk", 300.0));
+        products.add(new Product(134, "Bookshelf", 90.0));
+        products.add(new Product(135, "Printer", 130.0));
+        products.add(new Product(136, "Scanner", 140.0));
+        products.add(new Product(137, "Vacuum Cleaner", 180.0));
+        products.add(new Product(138, "Iron", 40.0));
+        products.add(new Product(139, "Toaster", 35.0));
+        products.add(new Product(140, "Water Dispenser", 160.0));
+        products.add(new Product(141, "Tablet Pen", 45.0));
+        products.add(new Product(142, "Noise Cancelling Headphones", 250.0));
+        products.add(new Product(143, "Smart Light Bulb", 30.0));
+        products.add(new Product(144, "Thermostat", 200.0));
+        products.add(new Product(145, "Fitness Tracker", 120.0));
+        products.add(new Product(146, "VR Headset", 600.0));
+        products.add(new Product(147, "Electric Scooter", 400.0));
+        products.add(new Product(148, "Drone", 550.0));
+        products.add(new Product(149, "Smart Lock", 180.0));
+        products.add(new Product(150, "Security Camera", 150.0));
 
-        // Retrieve user information
         User loggedIn = getUser(loggedInUser);
 
         frame = new JFrame("Online Shopping Catalog");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(700, 500);
+        frame.setSize(800, 600);
         frame.setLayout(new BorderLayout());
 
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -303,7 +347,6 @@ public class OnlineShoppingGUI {
         profilePanel.add(new JLabel("Age: " + loggedIn.age));
         profilePanel.add(new JLabel("Phone Number: " + loggedIn.phoneNumber));
 
-        // Toggle button to show/hide extra info (animating down)
         JButton toggleButton = new JButton("Show More Info");
         JPanel extraInfoPanel = new JPanel();
         extraInfoPanel.setLayout(new BoxLayout(extraInfoPanel, BoxLayout.Y_AXIS));
@@ -321,23 +364,9 @@ public class OnlineShoppingGUI {
 
         profilePanel.add(toggleButton);
         profilePanel.add(extraInfoPanel);
+        extraInfoPanel.setVisible(false);
         tabbedPane.addTab("Profile", profilePanel);
 
-        // Seller options (if the logged-in user is a seller)
-        if (loggedIn.role.equals("Seller")) {
-            JPanel sellerPanel = new JPanel();
-            JButton addProductButton = new JButton("Add Product");
-            JButton modifyPriceButton = new JButton("Modify Product Price");
-
-            addProductButton.addActionListener(e -> showAddProductScreen());
-            modifyPriceButton.addActionListener(e -> showModifyPriceScreen());
-
-            sellerPanel.add(addProductButton);
-            sellerPanel.add(modifyPriceButton);
-            tabbedPane.addTab("Seller Options", sellerPanel);
-        }
-
-        // Other panels...
         JPanel addressPanel = new JPanel();
         addressPanel.add(new JLabel("Shipping Address: (To be updated soon)"));
         tabbedPane.addTab("Address", addressPanel);
@@ -353,7 +382,7 @@ public class OnlineShoppingGUI {
         signOutPanel.add(signOutButton);
         tabbedPane.addTab("Sign Out", signOutPanel);
 
-        // Product Table and Cart...
+        // Product Table
         String[] columns = {"ID", "Name", "Price"};
         productTableModel = new DefaultTableModel(columns, 0);
         productTable = new JTable(productTableModel);
@@ -375,12 +404,59 @@ public class OnlineShoppingGUI {
         buttonPanel.add(checkoutButton);
         cartPanel.add(buttonPanel, BorderLayout.SOUTH);
 
+        // 🔍 Search Panel
+        JPanel searchPanel = new JPanel(new GridLayout(2, 4, 5, 5));
+        JTextField nameField = new JTextField();
+        JTextField minPriceField = new JTextField();
+        JTextField maxPriceField = new JTextField();
+        JButton searchButton = new JButton("Search");
+        JButton resetButton = new JButton("Reset");
+
+        searchPanel.setBorder(BorderFactory.createTitledBorder("Search Products"));
+        searchPanel.add(new JLabel("Name:"));
+        searchPanel.add(nameField);
+        searchPanel.add(new JLabel("Min Price:"));
+        searchPanel.add(minPriceField);
+        searchPanel.add(new JLabel("Max Price:"));
+        searchPanel.add(maxPriceField);
+        searchPanel.add(searchButton);
+        searchPanel.add(resetButton);
+
+        searchButton.addActionListener(e -> {
+            String nameText = nameField.getText().trim().toLowerCase();
+            String minText = minPriceField.getText().trim();
+            String maxText = maxPriceField.getText().trim();
+
+            double min = minText.isEmpty() ? 0 : Double.parseDouble(minText);
+            double max = maxText.isEmpty() ? Double.MAX_VALUE : Double.parseDouble(maxText);
+
+            productTableModel.setRowCount(0); // clear table
+            for (Product p : products) {
+                if (p.getName().toLowerCase().contains(nameText)
+                    && p.getPrice() >= min
+                    && p.getPrice() <= max) {
+                    productTableModel.addRow(new Object[]{p.getId(), p.getName(), p.getPrice()});
+                }
+            }
+        });
+
+        resetButton.addActionListener(e -> {
+            nameField.setText("");
+            minPriceField.setText("");
+            maxPriceField.setText("");
+            productTableModel.setRowCount(0);
+            loadProducts();
+        });
+
+        // Layout
         frame.add(tabbedPane, BorderLayout.NORTH);
         frame.add(new JScrollPane(productTable), BorderLayout.CENTER);
         frame.add(cartPanel, BorderLayout.EAST);
+        frame.add(searchPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
-    }
+}
+
 
     // Show Add Product Screen for sellers
     private void showAddProductScreen() {
@@ -478,19 +554,30 @@ public class OnlineShoppingGUI {
     }
 
     private void checkout() {
-        if (cart.isEmpty()) {
-            JOptionPane.showMessageDialog(frame, "Your cart is empty!", "Error", JOptionPane.ERROR_MESSAGE);
-        } else {
-            double total = 0;
-            StringBuilder receipt = new StringBuilder("Receipt:\n");
-            for (Product product : cart) {
-                receipt.append(product.getName()).append(" - ").append(product.getPrice()).append("\n");
-                total += product.getPrice();
-            }
-            receipt.append("\nTotal: ").append(total);
+    if (cart.isEmpty()) {
+        JOptionPane.showMessageDialog(frame, "Your cart is empty!", "Error", JOptionPane.ERROR_MESSAGE);
+    } else {
+        double total = 0;
+        StringBuilder receipt = new StringBuilder("Receipt:\n");
+        for (Product product : cart) {
+            receipt.append(product.getName()).append(" - ").append(product.getPrice()).append("\n");
+            total += product.getPrice();
+        }
+        receipt.append("\nTotal: ").append(total);
+
+        // Payment options
+        String[] paymentOptions = {"E-cash payment", "Cash on Delivery", "Debit/Credit"};
+        String selectedPayment = (String) JOptionPane.showInputDialog(frame, "Select Payment Method:",
+                "Payment", JOptionPane.QUESTION_MESSAGE, null, paymentOptions, paymentOptions[0]);
+
+        if (selectedPayment != null) {
+            receipt.append("\nPayment Method: ").append(selectedPayment);
             JOptionPane.showMessageDialog(frame, receipt.toString(), "Checkout", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(frame, "Payment method selection was cancelled.", "Checkout", JOptionPane.WARNING_MESSAGE);
         }
     }
+}
 
     private User getUser(String username) {
         for (User user : users) {
