@@ -3,6 +3,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class OnlineShoppingGUI {
     private JFrame frame;
@@ -13,6 +15,9 @@ public class OnlineShoppingGUI {
     private List<Product> cart;
     private String loggedInUser  ;
     private List<User> users = new ArrayList<>();
+    private JSpinner quantitySpinner; // Spinner for quantity input
+    private JTextField couponField; // Field for entering coupon code
+    private Map<String, Double> validCoupons; // Map to store valid coupons
 
     class User {
         String username;
@@ -276,20 +281,26 @@ public class OnlineShoppingGUI {
             return stock;
         }
 
-        public void reduceStock() {
-            if (stock > 0) {
-                stock--;
+        public void reduceStock(int quantity) {
+            if (stock >= quantity) {
+                stock -= quantity;
             }
         }
 
-        private void setPrice(double parseDouble) {
-            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        public void setPrice(double price) {
+            this.price = price;
         }
     }
 
     private void showMainScreen() {
         products = new ArrayList<>();
         cart = new ArrayList<>();
+        validCoupons = new HashMap<>();
+
+        // Initialize valid coupons
+        validCoupons.put("IND10", 10.0); // 10% discount
+        validCoupons.put("IND20", 20.0); // 20% discount
+        // Add more coupons as needed
 
         // Sample products with stock levels
         products.add(new Product(101, "Laptop", 1200.00, 5)); // 5 units in stock
@@ -382,6 +393,9 @@ public class OnlineShoppingGUI {
 
         cartModel = new DefaultListModel<>();
         JList<String> cartList = new JList<>(cartModel);
+        
+        // Quantity input
+        quantitySpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1)); // Default quantity is 1, max 10
         JButton addToCartButton = new JButton("Add to Cart");
         JButton removeFromCartButton = new JButton("Remove from Cart");
         JButton checkoutButton = new JButton("Checkout");
@@ -394,10 +408,21 @@ public class OnlineShoppingGUI {
         cartPanel.add(new JScrollPane(cartList), BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 5, 5));
+        buttonPanel.add(new JLabel("Quantity:"));
+        buttonPanel.add(quantitySpinner);
         buttonPanel.add(addToCartButton);
-        buttonPanel.add(removeFromCartButton); // Add the remove button here
+        buttonPanel.add(removeFromCartButton);
         buttonPanel.add(checkoutButton);
         cartPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Coupon Panel
+        JPanel couponPanel = new JPanel();
+        couponField = new JTextField(15);
+        JButton applyCouponButton = new JButton("Apply Coupon");
+        applyCouponButton.addActionListener(e -> applyCoupon());
+        couponPanel.add(new JLabel("Coupon Code:"));
+        couponPanel.add(couponField);
+        couponPanel.add(applyCouponButton);
 
         // Search Panel
         JPanel searchPanel = new JPanel(new GridLayout(2, 4, 5, 5));
@@ -448,6 +473,7 @@ public class OnlineShoppingGUI {
         mainPanel.add(dashboardPanel, BorderLayout.WEST);
         mainPanel.add(new JScrollPane(productTable), BorderLayout.CENTER);
         mainPanel.add(cartPanel, BorderLayout.EAST);
+        mainPanel.add(couponPanel, BorderLayout.NORTH);
         mainPanel.add(searchPanel, BorderLayout.SOUTH);
 
         frame.add(mainPanel);
@@ -592,13 +618,33 @@ public class OnlineShoppingGUI {
         int selectedRow = productTable.getSelectedRow();
         if (selectedRow >= 0) {
             Product selectedProduct = products.get(selectedRow);
-            if (selectedProduct.getStock() > 0) {
-                cart.add(selectedProduct);
-                cartModel.addElement(selectedProduct.getName());
-                selectedProduct.reduceStock();
-                JOptionPane.showMessageDialog(frame, selectedProduct.getName() + " added to cart.");
+            int quantity = (int) quantitySpinner.getValue(); // Get the quantity from the spinner
+
+            // Debugging statements
+            System.out.println("Selected Product: " + selectedProduct.getName());
+            System.out.println("Requested Quantity: " + quantity);
+            System.out.println("Available Stock: " + selectedProduct.getStock());
+
+            if (selectedProduct.getStock() >= quantity) {
+                // Check if the product is already in the cart
+                boolean productExists = false;
+                for (int i = 0; i < cart.size(); i++) {
+                    Product cartProduct = cart.get(i);
+                    if (cartProduct.getId() == selectedProduct.getId()) {
+                        // Update the quantity in the cart
+                        cartModel.set(i, cartProduct.getName() + " x " + (quantity + 1)); // Update display
+                        productExists = true;
+                        break;
+                    }
+                }
+                if (!productExists) {
+                    cart.add(selectedProduct);
+                    cartModel.addElement(selectedProduct.getName() + " x " + quantity); // Add new product with quantity
+                }
+                selectedProduct.reduceStock(quantity); // Reduce stock by the specified quantity
+                JOptionPane.showMessageDialog(frame, quantity + " of " + selectedProduct.getName() + " added to cart.");
             } else {
-                JOptionPane.showMessageDialog(frame, "This product is out of stock and cannot be added to the cart.", "Out of Stock", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Insufficient stock available.", "Out of Stock", JOptionPane.WARNING_MESSAGE);
             }
         } else {
             JOptionPane.showMessageDialog(frame, "Please select a product to add to the cart", "Error", JOptionPane.ERROR_MESSAGE);
@@ -609,11 +655,25 @@ public class OnlineShoppingGUI {
         int selectedIndex = cartModel.getSize() > 0 ? cartModel.getSize() - 1 : -1; // Get the last selected index
         if (selectedIndex >= 0) {
             // Remove the selected item from the cart
-            cart.remove(selectedIndex);
+            Product removedProduct = cart.remove(selectedIndex);
             cartModel.remove(selectedIndex);
+            removedProduct.reduceStock(1); // Increase stock when removed from cart
             JOptionPane.showMessageDialog(frame, "Item removed from cart successfully!");
         } else {
             JOptionPane.showMessageDialog(frame, "Please select an item to remove from the cart", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void applyCoupon() {
+        String couponCode = couponField.getText().trim();
+        double discount = 0.0;
+
+        // Check if the coupon code is valid
+        if (validCoupons.containsKey(couponCode)) {
+            discount = validCoupons.get(couponCode);
+            JOptionPane.showMessageDialog(frame, "Coupon applied! Discount: " + discount + "%");
+        } else {
+            JOptionPane.showMessageDialog(frame, "Invalid coupon code!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -629,14 +689,29 @@ public class OnlineShoppingGUI {
             }
             receipt.append("\nTotal: ").append(total);
 
+            // Apply coupon discount if available
+            String couponCode = couponField.getText().trim();
+            if (validCoupons.containsKey(couponCode)) {
+                double discount = validCoupons.get(couponCode);
+                total -= (total * discount / 100);
+                receipt.append("\nDiscount: ").append(discount).append("%");
+            }
+
             // Payment options
             String[] paymentOptions = {"E-cash payment", "Cash on Delivery", "Debit/Credit"};
             String selectedPayment = (String) JOptionPane.showInputDialog(frame, "Select Payment Method:",
                     "Payment", JOptionPane.QUESTION_MESSAGE, null, paymentOptions, paymentOptions[0]);
 
             if (selectedPayment != null) {
+                // Deduct stock for each product in the cart
+                for (Product product : cart) {
+                    product.reduceStock(1); // Deduct stock after checkout
+                }
                 receipt.append("\nPayment Method: ").append(selectedPayment);
                 JOptionPane.showMessageDialog(frame, receipt.toString(), "Checkout", JOptionPane.INFORMATION_MESSAGE);
+                cart.clear(); // Clear the cart after checkout
+                cartModel.clear(); // Clear the cart model
+                loadProducts(); // Reload products to update stock display
             } else {
                 JOptionPane.showMessageDialog(frame, "Payment method selection was cancelled.", "Checkout", JOptionPane.WARNING_MESSAGE);
             }
