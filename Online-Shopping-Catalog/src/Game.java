@@ -531,146 +531,158 @@ public class OnlineShoppingGUI {
         
         User loggedIn = getUser (loggedInUser );
 
-        frame = new JFrame("Online Shopping Catalog");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
-        frame.setLayout(new BorderLayout());
+    frame = new JFrame("Online Shopping Catalog");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(800, 600);
+    frame.setLayout(new BorderLayout());
 
-        JTabbedPane tabbedPane = new JTabbedPane();
+    // Dashboard Panel
+    JPanel dashboardPanel = new JPanel();
+    dashboardPanel.setLayout(new BoxLayout(dashboardPanel, BoxLayout.Y_AXIS));
 
-        // Profile Panel
-        JPanel profilePanel = new JPanel();
-        profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
+    JButton toggleButton = new JButton("Show Dashboard");
+    JPanel dashboardContent = new JPanel();
+    dashboardContent.setLayout(new BoxLayout(dashboardContent, BoxLayout.Y_AXIS));
+    dashboardContent.setVisible(false); // Initially hidden
 
-        // Editable fields for user profile
-        JTextField usernameField = new JTextField(loggedIn.username);
-        JTextField genderField = new JTextField(loggedIn.gender);
-        JTextField countryField = new JTextField(loggedIn.country);
-        JTextField ageField = new JTextField(String.valueOf(loggedIn.age));
-        JTextField phoneField = new JTextField(loggedIn.phoneNumber);
+    // Profile Panel
+    JPanel profilePanel = new JPanel();
+    profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
 
-        profilePanel.add(new JLabel("Username:"));
-        profilePanel.add(usernameField);
-        profilePanel.add(new JLabel("Gender:"));
-        profilePanel.add(genderField);
-        profilePanel.add(new JLabel("Country:"));
-        profilePanel.add(countryField);
-        profilePanel.add(new JLabel("Age:"));
-        profilePanel.add(ageField);
-        profilePanel.add(new JLabel("Phone Number:"));
-        profilePanel.add(phoneField);
+    JTextField usernameField = new JTextField(loggedIn.username);
+    JTextField genderField = new JTextField(loggedIn.gender);
+    JTextField countryField = new JTextField(loggedIn.country);
+    JTextField ageField = new JTextField(String.valueOf(loggedIn.age));
+    JTextField phoneField = new JTextField(loggedIn.phoneNumber);
 
-        JButton saveButton = new JButton("Save Changes");
-        saveButton.addActionListener(e -> {
-            // Update user information
-            loggedIn.username = usernameField.getText();
-            loggedIn.gender = genderField.getText();
-            loggedIn.country = countryField.getText();
-            loggedIn.age = Integer.parseInt(ageField.getText());
-            loggedIn.phoneNumber = phoneField.getText();
+    profilePanel.add(new JLabel("Username:"));
+    profilePanel.add(usernameField);
+    profilePanel.add(new JLabel("Gender:"));
+    profilePanel.add(genderField);
+    profilePanel.add(new JLabel("Country:"));
+    profilePanel.add(countryField);
+    profilePanel.add(new JLabel("Age:"));
+    profilePanel.add(ageField);
+    profilePanel.add(new JLabel("Phone Number:"));
+    profilePanel.add(phoneField);
 
-            JOptionPane.showMessageDialog(frame, "Profile updated successfully!");
+    JButton saveButton = new JButton("Save Changes");
+    saveButton.addActionListener(e -> {
+        loggedIn.username = usernameField.getText();
+        loggedIn.gender = genderField.getText();
+        loggedIn.country = countryField.getText();
+        loggedIn.age = Integer.parseInt(ageField.getText());
+        loggedIn.phoneNumber = phoneField.getText();
+        JOptionPane.showMessageDialog(frame, "Profile updated successfully!");
+    });
 
-            // Shrink the profile panel
-            profilePanel.setPreferredSize(new Dimension(300, 200)); // Set a smaller preferred size
-            profilePanel.revalidate(); // Revalidate the panel to apply the new size
-            profilePanel.repaint(); // Repaint the panel to reflect changes
-        });
+    profilePanel.add(saveButton);
+    dashboardContent.add(profilePanel);
 
-        profilePanel.add(saveButton);
-        tabbedPane.addTab("Profile", profilePanel);
+    // Address Panel
+    JPanel addressPanel = new JPanel();
+    addressPanel.add(new JLabel("Shipping Address: (To be updated soon)"));
+    dashboardContent.add(addressPanel);
 
-        // Address Panel
-        JPanel addressPanel = new JPanel();
-        addressPanel.add(new JLabel("Shipping Address: (To be updated soon)"));
-        tabbedPane.addTab("Address", addressPanel);
+    // Sign Out Panel
+    JPanel signOutPanel = new JPanel();
+    JButton signOutButton = new JButton("Sign Out");
+    signOutButton.setBackground(new Color(220, 20, 60));
+    signOutButton.setForeground(Color.WHITE);
+    signOutButton.addActionListener(e -> {
+        frame.dispose();
+        showLoginScreen();
+    });
+    signOutPanel.add(signOutButton);
+    dashboardContent.add(signOutPanel);
 
-        // Sign Out Panel
-        JPanel signOutPanel = new JPanel();
-        JButton signOutButton = new JButton("Sign Out");
-        signOutButton.setBackground(new Color(220, 20, 60));
-        signOutButton.setForeground(Color.WHITE);
-        signOutButton.addActionListener(e -> {
-            frame.dispose();
-            showLoginScreen();
-        });
-        signOutPanel.add(signOutButton);
-        tabbedPane.addTab("Sign Out", signOutPanel);
+    // Toggle Button Action
+    toggleButton.addActionListener(e -> {
+        dashboardContent.setVisible(!dashboardContent.isVisible());
+        toggleButton.setText(dashboardContent.isVisible() ? "Hide Dashboard" : "Show Dashboard");
+        dashboardPanel.revalidate();
+        dashboardPanel.repaint();
+    });
 
-        // Product Table
-        String[] columns = {"ID", "Name", "Price"};
-        productTableModel = new DefaultTableModel(columns, 0);
-        productTable = new JTable(productTableModel);
-        loadProducts();
+    dashboardPanel.add(toggleButton);
+    dashboardPanel.add(dashboardContent);
 
-        cartModel = new DefaultListModel<>();
-        JList<String> cartList = new JList<>(cartModel);
-        JButton addToCartButton = new JButton("Add to Cart");
-        JButton checkoutButton = new JButton("Checkout");
+    // Product Table
+    String[] columns = {"ID", "Name", "Price"};
+    productTableModel = new DefaultTableModel(columns, 0);
+    productTable = new JTable(productTableModel);
+    loadProducts();
 
-        addToCartButton.addActionListener(e -> addToCart());
-        checkoutButton.addActionListener(e -> checkout());
+    cartModel = new DefaultListModel<>();
+    JList<String> cartList = new JList<>(cartModel);
+    JButton addToCartButton = new JButton("Add to Cart");
+    JButton checkoutButton = new JButton("Checkout");
 
-        JPanel cartPanel = new JPanel(new BorderLayout());
-        cartPanel.add(new JScrollPane(cartList), BorderLayout.CENTER);
+    addToCartButton.addActionListener(e -> addToCart());
+    checkoutButton.addActionListener(e -> checkout());
 
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 5, 5));
-        buttonPanel.add(addToCartButton);
-        buttonPanel.add(checkoutButton);
-        cartPanel.add(buttonPanel, BorderLayout.SOUTH);
+    JPanel cartPanel = new JPanel(new BorderLayout());
+    cartPanel.add(new JScrollPane(cartList), BorderLayout.CENTER);
 
-        // Search Panel
-        JPanel searchPanel = new JPanel(new GridLayout(2, 4, 5, 5));
-        JTextField nameField = new JTextField();
-        JTextField minPriceField = new JTextField();
-        JTextField maxPriceField = new JTextField();
-        JButton searchButton = new JButton("Search");
-        JButton resetButton = new JButton("Reset");
+    JPanel buttonPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+    buttonPanel.add(addToCartButton);
+    buttonPanel.add(checkoutButton);
+    cartPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        searchPanel.setBorder(BorderFactory.createTitledBorder("Search Products"));
-        searchPanel.add(new JLabel("Name:"));
-        searchPanel.add(nameField);
-        searchPanel.add(new JLabel("Min Price:"));
-        searchPanel.add(minPriceField);
-        searchPanel.add(new JLabel("Max Price:"));
-        searchPanel.add(maxPriceField);
-        searchPanel.add(searchButton);
-        searchPanel.add(resetButton);
+    // Search Panel
+    JPanel searchPanel = new JPanel(new GridLayout(2, 4, 5, 5));
+    JTextField nameField = new JTextField();
+    JTextField minPriceField = new JTextField();
+    JTextField maxPriceField = new JTextField();
+    JButton searchButton = new JButton("Search");
+    JButton resetButton = new JButton("Reset");
 
-        searchButton.addActionListener(e -> {
-            String nameText = nameField.getText().trim().toLowerCase();
-            String minText = minPriceField.getText().trim();
-            String maxText = maxPriceField.getText().trim();
+    searchPanel.setBorder(BorderFactory.createTitledBorder("Search Products"));
+    searchPanel.add(new JLabel("Name:"));
+    searchPanel.add(nameField);
+    searchPanel.add(new JLabel("Min Price:"));
+    searchPanel.add(minPriceField);
+    searchPanel.add(new JLabel("Max Price:"));
+    searchPanel.add(maxPriceField);
+    searchPanel.add(searchButton);
+    searchPanel.add(resetButton);
 
-            double min = minText.isEmpty() ? 0 : Double.parseDouble(minText);
-            double max = maxText.isEmpty() ? Double.MAX_VALUE : Double.parseDouble(maxText);
+    searchButton.addActionListener(e -> {
+        String nameText = nameField.getText().trim().toLowerCase();
+        String minText = minPriceField.getText().trim();
+        String maxText = maxPriceField.getText().trim();
 
-            productTableModel.setRowCount(0); // clear table
-            for (Product p : products) {
-                if (p.getName().toLowerCase().contains(nameText)
-                    && p.getPrice() >= min
-                    && p.getPrice() <= max) {
-                    productTableModel.addRow(new Object[]{p.getId(), p.getName(), p.getPrice()});
-                }
+        double min = minText.isEmpty() ? 0 : Double.parseDouble(minText);
+        double max = maxText.isEmpty() ? Double.MAX_VALUE : Double.parseDouble(maxText);
+
+        productTableModel.setRowCount(0); // clear table
+        for (Product p : products) {
+            if (p.getName().toLowerCase().contains(nameText)
+                && p.getPrice() >= min
+                && p.getPrice() <= max) {
+                productTableModel.addRow(new Object[]{p.getId(), p.getName(), p.getPrice()});
             }
-        });
+        }
+    });
 
-        resetButton.addActionListener(e -> {
-            nameField.setText("");
-            minPriceField.setText("");
-            maxPriceField.setText("");
-            productTableModel.setRowCount(0);
-            loadProducts();
-        });
+    resetButton.addActionListener(e -> {
+        nameField.setText("");
+        minPriceField.setText("");
+        maxPriceField.setText("");
+        productTableModel.setRowCount(0);
+        loadProducts();
+    });
 
-        // Layout
-        frame.add(tabbedPane, BorderLayout.NORTH);
-        frame.add(new JScrollPane(productTable), BorderLayout.CENTER);
-        frame.add(cartPanel, BorderLayout.EAST);
-        frame.add(searchPanel, BorderLayout.SOUTH);
+    // Layout
+    JPanel mainPanel = new JPanel(new BorderLayout());
+    mainPanel.add(dashboardPanel, BorderLayout.WEST);
+    mainPanel.add(new JScrollPane(productTable), BorderLayout.CENTER);
+    mainPanel.add(cartPanel, BorderLayout.EAST);
+    mainPanel.add(searchPanel, BorderLayout.SOUTH);
 
-        frame.setVisible(true);
-    }
+    frame.add(mainPanel);
+    frame.setVisible(true);
+}
 
     // Show Add Product Screen for sellers
     private void showAddProductScreen() {
