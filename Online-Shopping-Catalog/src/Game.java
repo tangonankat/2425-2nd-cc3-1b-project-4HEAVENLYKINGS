@@ -12,8 +12,31 @@ public class OnlineShoppingGUI {
     private List<Product> products;
     private List<Product> cart;
     private String loggedInUser;
+    private List<User> users = new ArrayList<>();
+
+    class User {
+        String username;
+        String password;
+        String role;
+        String gender;
+        String country;
+        int age;
+        String phoneNumber;
+
+        public User(String username, String password, String role, String gender, String country, int age, String phoneNumber) {
+            this.username = username;
+            this.password = password;
+            this.role = role;
+            this.gender = gender;
+            this.country = country;
+            this.age = age;
+            this.phoneNumber = phoneNumber;
+        }
+    }
 
     public OnlineShoppingGUI() {
+        users.add(new User("admin", "password", "Admin", "Male", "USA", 30, "123-456-7890"));
+        users.add(new User("customer", "1234", "Customer", "Female", "Canada", 25, "987-654-3210"));
         showLoginScreen();
     }
 
@@ -41,6 +64,17 @@ public class OnlineShoppingGUI {
         passLabel.setForeground(Color.BLACK);
         JPasswordField passField = new JPasswordField(10);
 
+        // Add a checkbox to show/hide password
+        JCheckBox showPasswordCheckBox = new JCheckBox("Show Password");
+        showPasswordCheckBox.setBackground(new Color(173, 216, 230));
+        showPasswordCheckBox.addActionListener(e -> {
+            if (showPasswordCheckBox.isSelected()) {
+                passField.setEchoChar((char) 0);  // Show password
+            } else {
+                passField.setEchoChar('*');  // Hide password
+            }
+        });
+
         JLabel roleLabel = new JLabel("Role:");
         String[] roles = {"Customer", "Admin"};
         JComboBox<String> roleComboBox = new JComboBox<>(roles);
@@ -66,7 +100,7 @@ public class OnlineShoppingGUI {
             }
         });
 
-        registerButton.addActionListener(e -> JOptionPane.showMessageDialog(loginFrame, "Registration feature coming soon!"));
+        registerButton.addActionListener(e -> showRegisterScreen());
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -87,15 +121,20 @@ public class OnlineShoppingGUI {
         gbc.gridx = 1;
         panel.add(passField, gbc);
 
-        gbc.gridx = 0;
+        // Add the checkbox for showing password
+        gbc.gridx = 1;
         gbc.gridy = 3;
+        panel.add(showPasswordCheckBox, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 4;
         panel.add(roleLabel, gbc);
 
         gbc.gridx = 1;
         panel.add(roleComboBox, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         panel.add(loginButton, gbc);
 
         gbc.gridx = 1;
@@ -105,9 +144,110 @@ public class OnlineShoppingGUI {
         loginFrame.setVisible(true);
     }
 
+    private void showRegisterScreen() {
+        JFrame registerFrame = new JFrame("Register");
+        registerFrame.setSize(350, 300);
+        registerFrame.setLayout(new BorderLayout());
+        registerFrame.getContentPane().setBackground(new Color(224, 255, 255));
+
+        JLabel titleLabel = new JLabel("Register New Account", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(224, 255, 255));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel userLabel = new JLabel("Username:");
+        JTextField userField = new JTextField(10);
+        JLabel passLabel = new JLabel("Password:");
+        JPasswordField passField = new JPasswordField(10);
+        JLabel roleLabel = new JLabel("Role:");
+        String[] roles = {"Customer", "Admin"};
+        JComboBox<String> roleComboBox = new JComboBox<>(roles);
+
+        // Add a checkbox to show/hide password
+        JCheckBox showPasswordCheckBox = new JCheckBox("Show Password");
+        showPasswordCheckBox.setBackground(new Color(224, 255, 255));
+        showPasswordCheckBox.addActionListener(e -> {
+            if (showPasswordCheckBox.isSelected()) {
+                passField.setEchoChar((char) 0);  // Show password
+            } else {
+                passField.setEchoChar('*');  // Hide password
+            }
+        });
+
+        JButton submitButton = new JButton("Register");
+        submitButton.setBackground(new Color(34, 139, 34));
+        submitButton.setForeground(Color.WHITE);
+
+        submitButton.addActionListener(e -> {
+            String username = userField.getText();
+            String password = new String(passField.getPassword());
+            String role = (String) roleComboBox.getSelectedItem();
+
+            if (username.isEmpty() || password.isEmpty()) {
+                JOptionPane.showMessageDialog(registerFrame, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            for (User user : users) {
+                if (user.username.equals(username)) {
+                    JOptionPane.showMessageDialog(registerFrame, "Username already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            }
+
+            users.add(new User(username, password, role, "Not Set", "Not Set", 0, "Not Set"));
+            JOptionPane.showMessageDialog(registerFrame, "Registration successful!");
+            registerFrame.dispose();
+        });
+
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(titleLabel, gbc);
+
+        gbc.gridy++;
+        gbc.gridwidth = 1;
+        panel.add(userLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(userField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(passLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(passField, gbc);
+
+        // Add the checkbox for showing password
+        gbc.gridx = 1;
+        gbc.gridy++;
+        panel.add(showPasswordCheckBox, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        panel.add(roleLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(roleComboBox, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        panel.add(submitButton, gbc);
+
+        registerFrame.add(panel, BorderLayout.CENTER);
+        registerFrame.setVisible(true);
+    }
+
     private boolean authenticate(String username, String password, String role) {
-        return ("admin".equals(username) && "password".equals(password)) ||
-               ("customer".equals(username) && "1234".equals(password));
+        for (User user : users) {
+            if (user.username.equals(username) && user.password.equals(password) && user.role.equals(role)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     class Product {
@@ -144,25 +284,51 @@ public class OnlineShoppingGUI {
         products.add(new Product(104, "Smartwatch", 200.0));
         products.add(new Product(105, "Tablet", 600.0));
 
+        // Retrieve user information
+        User loggedIn = getUser(loggedInUser);
+
         frame = new JFrame("Online Shopping Catalog");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(700, 500);
         frame.setLayout(new BorderLayout());
 
-        // === Dashboard Tabs ===
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // Profile Tab
+        // Profile Panel
         JPanel profilePanel = new JPanel();
-        profilePanel.add(new JLabel("Username: " + loggedInUser));
+        profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
+        profilePanel.add(new JLabel("Username: " + loggedIn.username));
+        profilePanel.add(new JLabel("Gender: " + loggedIn.gender));
+        profilePanel.add(new JLabel("Country: " + loggedIn.country));
+        profilePanel.add(new JLabel("Age: " + loggedIn.age));
+        profilePanel.add(new JLabel("Phone Number: " + loggedIn.phoneNumber));
+
+        // Toggle button to show/hide extra info (animating down)
+        JButton toggleButton = new JButton("Show More Info");
+        JPanel extraInfoPanel = new JPanel();
+        extraInfoPanel.setLayout(new BoxLayout(extraInfoPanel, BoxLayout.Y_AXIS));
+        extraInfoPanel.add(new JLabel("This is additional profile info"));
+
+        toggleButton.addActionListener(e -> {
+            // Simple animation effect for showing/hiding additional information
+            if (extraInfoPanel.isVisible()) {
+                extraInfoPanel.setVisible(false);
+                toggleButton.setText("Show More Info");
+            } else {
+                extraInfoPanel.setVisible(true);
+                toggleButton.setText("Hide Info");
+            }
+        });
+
+        profilePanel.add(toggleButton);
+        profilePanel.add(extraInfoPanel);
         tabbedPane.addTab("Profile", profilePanel);
 
-        // Address Tab
+        // Other panels...
         JPanel addressPanel = new JPanel();
         addressPanel.add(new JLabel("Shipping Address: (To be updated soon)"));
         tabbedPane.addTab("Address", addressPanel);
 
-        // Sign Out Tab
         JPanel signOutPanel = new JPanel();
         JButton signOutButton = new JButton("Sign Out");
         signOutButton.setBackground(new Color(220, 20, 60));
@@ -174,13 +340,12 @@ public class OnlineShoppingGUI {
         signOutPanel.add(signOutButton);
         tabbedPane.addTab("Sign Out", signOutPanel);
 
-        // === Product Table ===
+        // Product Table and Cart...
         String[] columns = {"ID", "Name", "Price"};
         productTableModel = new DefaultTableModel(columns, 0);
         productTable = new JTable(productTableModel);
         loadProducts();
 
-        // === Cart Panel ===
         cartModel = new DefaultListModel<>();
         JList<String> cartList = new JList<>(cartModel);
         JButton addToCartButton = new JButton("Add to Cart");
@@ -197,7 +362,7 @@ public class OnlineShoppingGUI {
         buttonPanel.add(checkoutButton);
         cartPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        frame.add(tabbedPane, BorderLayout.NORTH); // 👈 Tabs on top
+        frame.add(tabbedPane, BorderLayout.NORTH);
         frame.add(new JScrollPane(productTable), BorderLayout.CENTER);
         frame.add(cartPanel, BorderLayout.EAST);
 
@@ -230,10 +395,18 @@ public class OnlineShoppingGUI {
     }
 
     private void loadProducts() {
-        productTableModel.setRowCount(0);
         for (Product product : products) {
             productTableModel.addRow(new Object[]{product.getId(), product.getName(), product.getPrice()});
         }
+    }
+
+    private User getUser(String username) {
+        for (User user : users) {
+            if (user.username.equals(username)) {
+                return user;
+            }
+        }
+        return null; // User not found
     }
 
     public static void main(String[] args) {
