@@ -278,58 +278,258 @@ public class OnlineShoppingGUI {
         products = new ArrayList<>();
         cart = new ArrayList<>();
 
-        products.add(new Product(101, "Laptop", 1200.0));
-        products.add(new Product(102, "Smartphone", 800.0));
-        products.add(new Product(103, "Headphones", 150.0));
-        products.add(new Product(104, "Smartwatch", 200.0));
-        products.add(new Product(105, "Tablet", 600.0));
-        products.add(new Product(106, "Bluetooth Speaker", 90.0));
-        products.add(new Product(107, "Gaming Mouse", 45.0));
-        products.add(new Product(108, "Mechanical Keyboard", 100.0));
+        products.add(new Product(101, "Laptop", 1200.00));
+        products.add(new Product(102, "Smartphone", 800.00));
+        products.add(new Product(103, "Headphones", 150.00));
+        products.add(new Product(104, "Smartwatch", 200.00));
+        products.add(new Product(105, "Tablet", 600.00));
+        products.add(new Product(106, "Bluetooth Speaker", 90.00));
+        products.add(new Product(107, "Gaming Mouse", 45.00));
+        products.add(new Product(108, "Mechanical Keyboard", 100.00));
         products.add(new Product(109, "HD Monitor", 250.0));
-        products.add(new Product(110, "External Hard Drive", 110.0));
-        products.add(new Product(111, "Flash Drive", 20.0));
-        products.add(new Product(112, "Graphics Card", 500.0));
-        products.add(new Product(113, "Power Bank", 40.0));
-        products.add(new Product(114, "Webcam", 75.0));
-        products.add(new Product(115, "WiFi Router", 60.0));
-        products.add(new Product(116, "Projector", 300.0));
-        products.add(new Product(117, "Portable SSD", 150.0));
-        products.add(new Product(118, "Action Camera", 220.0));
-        products.add(new Product(119, "DSLR Camera", 900.0));
-        products.add(new Product(120, "Microwave Oven", 180.0));
-        products.add(new Product(121, "Air Fryer", 120.0));
-        products.add(new Product(122, "Blender", 80.0));
-        products.add(new Product(123, "Coffee Maker", 95.0));
-        products.add(new Product(124, "Electric Kettle", 40.0));
-        products.add(new Product(125, "Rice Cooker", 70.0));
-        products.add(new Product(126, "Smart TV", 1000.0));
-        products.add(new Product(127, "Washing Machine", 750.0));
-        products.add(new Product(128, "Refrigerator", 900.0));
-        products.add(new Product(129, "Air Conditioner", 1100.0));
-        products.add(new Product(130, "Electric Fan", 50.0));
-        products.add(new Product(131, "Desk Lamp", 25.0));
-        products.add(new Product(132, "Office Chair", 160.0));
-        products.add(new Product(133, "Standing Desk", 300.0));
-        products.add(new Product(134, "Bookshelf", 90.0));
-        products.add(new Product(135, "Printer", 130.0));
-        products.add(new Product(136, "Scanner", 140.0));
-        products.add(new Product(137, "Vacuum Cleaner", 180.0));
-        products.add(new Product(138, "Iron", 40.0));
-        products.add(new Product(139, "Toaster", 35.0));
-        products.add(new Product(140, "Water Dispenser", 160.0));
-        products.add(new Product(141, "Tablet Pen", 45.0));
-        products.add(new Product(142, "Noise Cancelling Headphones", 250.0));
-        products.add(new Product(143, "Smart Light Bulb", 30.0));
-        products.add(new Product(144, "Thermostat", 200.0));
-        products.add(new Product(145, "Fitness Tracker", 120.0));
+        products.add(new Product(110, "External Hard Drive", 110.00));
+        products.add(new Product(111, "Flash Drive", 20.00));
+        products.add(new Product(112, "Graphics Card", 500.00));
+        products.add(new Product(113, "Power Bank", 40.00));
+        products.add(new Product(114, "Webcam", 75.00));
+        products.add(new Product(115, "WiFi Router", 60.00));
+        products.add(new Product(116, "Projector", 300.00));
+        products.add(new Product(117, "Portable SSD", 150.00));
+        products.add(new Product(118, "Action Camera", 220.00));
+        products.add(new Product(119, "DSLR Camera", 900.00));
+        products.add(new Product(120, "Microwave Oven", 180.00));
+        products.add(new Product(121, "Air Fryer", 120.00));
+        products.add(new Product(122, "Blender", 80.00));
+        products.add(new Product(123, "Coffee Maker", 95.00));
+        products.add(new Product(124, "Electric Kettle", 40.00));
+        products.add(new Product(125, "Rice Cooker", 70.00));
+        products.add(new Product(126, "Smart TV", 1000.00));
+        products.add(new Product(127, "Washing Machine", 750.00));
+        products.add(new Product(128, "Refrigerator", 900.00));
+        products.add(new Product(129, "Air Conditioner", 1100.00));
+        products.add(new Product(130, "Electric Fan", 50.00));
+        products.add(new Product(131, "Desk Lamp", 25.00));
+        products.add(new Product(132, "Office Chair", 160.00));
+        products.add(new Product(133, "Standing Desk", 300.00));
+        products.add(new Product(134, "Bookshelf", 90.00));
+        products.add(new Product(135, "Printer", 130.00));
+        products.add(new Product(136, "Scanner", 140.00));
+        products.add(new Product(137, "Vacuum Cleaner", 180.00));
+        products.add(new Product(138, "Iron", 40.00));
+        products.add(new Product(139, "Toaster", 35.00));
+        products.add(new Product(140, "Water Dispenser", 160.00));
+        products.add(new Product(141, "Tablet Pen", 45.00));
+        products.add(new Product(142, "Noise Cancelling Headphones", 250.00));
+        products.add(new Product(143, "Smart Light Bulb", 30.00));
+        products.add(new Product(144, "Thermostat", 200.00));
+        products.add(new Product(145, "Fitness Tracker", 120.00));
         products.add(new Product(146, "VR Headset", 600.0));
-        products.add(new Product(147, "Electric Scooter", 400.0));
-        products.add(new Product(148, "Drone", 550.0));
-        products.add(new Product(149, "Smart Lock", 180.0));
-        products.add(new Product(150, "Security Camera", 150.0));
-
-        User loggedIn = getUser(loggedInUser);
+        products.add(new Product(147, "Electric Scooter", 400.00));
+        products.add(new Product(148, "Drone", 550.00));
+        products.add(new Product(149, "Smart Lock", 180.00));
+        products.add(new Product(150, "Security Camera", 150.00));
+        products.add(new Product(151, "Smartphone Case", 25.00));
+        products.add(new Product(152, "Wireless Charger", 30.00));
+        products.add(new Product(153, "USB-C Hub", 40.00));
+        products.add(new Product(154, "Gaming Headset", 80.00));
+        products.add(new Product(155, "Portable Bluetooth Speaker", 60.00));
+        products.add(new Product(156, "Smartwatch Charger", 20.00));
+        products.add(new Product(157, "Laptop Stand", 35.00));
+        products.add(new Product(158, "HDMI Cable", 15.00));
+        products.add(new Product(159, "Ethernet Cable", 10.00));
+        products.add(new Product(160, "Wireless Mouse", 25.00));
+        products.add(new Product(161, "Wireless Keyboard", 50.00));
+        products.add(new Product(162, "Laptop Sleeve", 30.00));
+        products.add(new Product(163, "Screen Protector", 15.00));
+        products.add(new Product(164, "Phone Stand", 20.00));
+        products.add(new Product(165, "Car Phone Mount", 25.00));
+        products.add(new Product(166, "Smart Light Strip", 40.00));
+        products.add(new Product(167, "Smart Thermostat", 150.00));
+        products.add(new Product(168, "Smart Plug", 30.00));
+        products.add(new Product(169, "Home Security System", 200.00));
+        products.add(new Product(170, "Smart Doorbell", 120.00));
+        products.add(new Product(171, "Smart Smoke Detector", 50.00));
+        products.add(new Product(172, "Smart Water Leak Detector", 70.00));
+        products.add(new Product(173, "Smart Garage Door Opener", 100.00));
+        products.add(new Product(174, "Smart Home Hub", 80.00));
+        products.add(new Product(175, "Smart Air Purifier", 150.00));
+        products.add(new Product(176, "Smart Coffee Maker", 120.00));
+        products.add(new Product(177, "Smart Refrigerator", 2000.00));
+        products.add(new Product(178, "Smart Oven", 800.00));
+        products.add(new Product(179, "Smart Dishwasher", 700.00));
+        products.add(new Product(180, "Smart Washing Machine", 900.00));
+        products.add(new Product(181, "Smart Dryer", 800.00));
+        products.add(new Product(182, "Electric Toothbrush", 100.00));
+        products.add(new Product(183, "Electric Shaver", 80.00));
+        products.add(new Product(184, "Hair Dryer", 50.0));
+        products.add(new Product(185, "Hair Straightener", 60.00));
+        products.add(new Product(186, "Electric Razor", 70.00));
+        products.add(new Product(187, "Electric Massager", 90.00));
+        products.add(new Product(188, "Electric Blanket", 100.00));
+        products.add(new Product(189, "Air Purifier", 150.00));
+        products.add(new Product(190, "Humidifier", 50.00));
+        products.add(new Product(191, "Dehumidifier", 80.00));
+        products.add(new Product(192, "Electric Kettle", 40.00));
+        products.add(new Product(193, "Coffee Grinder", 30.00));
+        products.add(new Product(194, "Electric Skillet", 60.00));
+        products.add(new Product(195, "Slow Cooker", 70.00));
+        products.add(new Product(196, "Pressure Cooker", 90.00));
+        products.add(new Product(197, "Rice Cooker", 50.00));
+        products.add(new Product(198, "Food Processor", 120.00));
+        products.add(new Product(199, "Blender", 80.00));
+        products.add(new Product(200, "Juicer", 100.00));
+        products.add(new Product(201, "Electric Grill", 150.00));
+        products.add(new Product(202, "Electric Fryer", 120.00));
+        products.add(new Product(203, "Toaster Oven", 70.00));
+        products.add(new Product(204, "Induction Cooktop", 200.00));
+        products.add(new Product(205, "Electric Pressure Washer", 300.0));
+        products.add(new Product(206, "Cordless Vacuum Cleaner", 150.00));
+        products.add(new Product(207, "Robot Vacuum", 250.00));
+        products.add(new Product(208, "Handheld Vacuum", 80.00));
+        products.add(new Product(209, "Steam Mop", 100.00));
+        products.add(new Product(210, "Car Vacuum Cleaner", 40.00));
+        products.add(new Product(211, "Electric Lawn Mower", 400.00));
+        products.add(new Product(212, "Electric Hedge Trimmer", 150.00));
+        products.add(new Product(213, "Electric Chainsaw", 200.00));
+        products.add(new Product(214, "Electric Leaf Blower", 100.00));
+        products.add(new Product(215, "Electric Pressure Washer", 300.00));
+        products.add(new Product(216, "Electric Snow Shovel", 200.00));
+        products.add(new Product(217, "Electric Grill", 150.00));
+        products.add(new Product(218, "Electric Fryer", 120.00));
+        products.add(new Product(219, "Electric Skillet", 60.00));
+        products.add(new Product(220, "Electric Wok", 80.00));
+        products.add(new Product(221, "Electric Fondue Pot", 70.00));
+        products.add(new Product(222, "Electric Popcorn Maker", 40.00));
+        products.add(new Product(223, "Electric Ice Cream Maker", 100.00));
+        products.add(new Product(224, "Electric Yogurt Maker", 50.00));
+        products.add(new Product(225, "Electric Food Dehydrator", 80.00));
+        products.add(new Product(226, "Electric Egg Cooker", 30.00));
+        products.add(new Product(227, "Electric Rice Cooker", 50.00));
+        products.add(new Product(228, "Electric Pressure Cooker", 90.00));
+        products.add(new Product(229, "Electric Slow Cooker", 70.00));
+        products.add(new Product(230, "Electric Food Steamer", 60.00));
+        products.add(new Product(231, "Electric Griddle", 80.00));
+        products.add(new Product(232, "Electric Sandwich Maker", 40.00));
+        products.add(new Product(233, "Electric Panini Press", 50.00));
+        products.add(new Product(234, "Electric Waffle Maker", 30.00));
+        products.add(new Product(235, "Electric Crepe Maker", 40.00));
+        products.add(new Product(236, "Electric Pizza Maker", 60.00));
+        products.add(new Product(237, "Electric Hot Dog Maker", 30.00));
+        products.add(new Product(238, "Electric Popcorn Maker", 40.00));
+        products.add(new Product(239, "Electric Candy Floss Maker", 50.00));
+        products.add(new Product(240, "Electric Chocolate Fountain", 70.00));
+        products.add(new Product(241, "Electric Food Processor", 120.00));
+        products.add(new Product(242, "Electric Blender", 80.00));
+        products.add(new Product(243, "Electric Juicer", 100.00));
+        products.add(new Product(244, "Electric Mixer", 60.99));
+        products.add(new Product(245, "Electric Food Chopper", 40.99));
+        products.add(new Product(246, "Electric Meat Grinder", 150.99));
+        products.add(new Product(247, "Electric Pasta Maker", 100.99));
+        products.add(new Product(248, "Electric Ice Maker", 200.99));
+        products.add(new Product(249, "Electric Water Dispenser", 150.99));
+        products.add(new Product(250, "Electric Water Heater", 100.0));
+        products.add(new Product(251, "Smartphone Wallet Case", 29.99));
+        products.add(new Product(252, "Wireless Earbuds", 79.99));
+        products.add(new Product(253, "Portable Power Bank", 39.99));
+        products.add(new Product(254, "Bluetooth Headphones", 89.99));
+        products.add(new Product(255, "Smartphone Tripod", 24.99));
+        products.add(new Product(256, "USB Wall Charger", 19.99));
+        products.add(new Product(257, "Screen Cleaning Kit", 14.99));
+        products.add(new Product(258, "Laptop Cooling Pad", 34.99));
+        products.add(new Product(259, "Wireless Charging Pad", 29.99));
+        products.add(new Product(260, "Smartphone Gimbal Stabilizer", 99.99));
+        products.add(new Product(261, "VR Headset", 299.99));
+        products.add(new Product(262, "Smart Home Security Camera", 149.99));
+        products.add(new Product(263, "Smart Light Bulb Starter Kit", 49.99));
+        products.add(new Product(264, "Smart Door Lock", 199.99));
+        products.add(new Product(265, "Smart Smoke Alarm", 39.99));
+        products.add(new Product(266, "Smart Water Sensor", 29.99));
+        products.add(new Product(267, "Smart Thermostat", 129.99));
+        products.add(new Product(268, "Smart Plug with Energy Monitoring", 34.99));
+        products.add(new Product(269, "Smart Home Hub", 79.99));
+        products.add(new Product(270, "Smart Light Switch", 49.99));
+        products.add(new Product(271, "Smart Garage Door Controller", 99.99));
+        products.add(new Product(272, "Smart Irrigation Controller", 129.99));
+        products.add(new Product(273, "Smart Pet Feeder", 89.99));
+        products.add(new Product(274, "Smart Air Quality Monitor", 59.99));
+        products.add(new Product(275, "Smart Coffee Maker", 149.99));
+        products.add(new Product(276, "Smart Refrigerator with Touchscreen", 2499.99));
+        products.add(new Product(277, "Smart Oven with Wi-Fi", 899.99));
+        products.add(new Product(278, "Smart Dishwasher with App Control", 799.99));
+        products.add(new Product(279, "Smart Washing Machine with Wi-Fi", 699.99));
+        products.add(new Product(280, "Smart Dryer with App Control", 699.99));
+        products.add(new Product(281, "Electric Toothbrush with App", 99.99));
+        products.add(new Product(282, "Electric Shaver with Smart Features", 79.99));
+        products.add(new Product(283, "Hair Dryer with Smart Heat Control", 59.99));
+        products.add(new Product(284, "Hair Straightener with App", 89.99));
+        products.add(new Product(285, "Electric Massager with Heat", 69.99));
+        products.add(new Product(286, "Electric Blanket with Timer", 49.99));
+        products.add(new Product(287, "Air Purifier with Smart Features", 149.99));
+        products.add(new Product(288, "Humidifier with App Control", 59.99));
+        products.add(new Product(289, "Dehumidifier with Smart Features", 89.99));
+        products.add(new Product(290, "Electric Kettle with Temperature Control", 39.99));
+        products.add(new Product(291, "Coffee Grinder with App", 49.99));
+        products.add(new Product(292, "Electric Skillet with Temperature Control", 59.99));
+        products.add(new Product(293, "Pressure Cooker with Smart Features", 99.99));
+        products.add(new Product(294, "Rice Cooker with App Control", 49.99));
+        products.add(new Product(295, "Food Processor with Smart Features", 129.99));
+        products.add(new Product(296, "Blender with Smart Features", 79.99));
+        products.add(new Product(297, "Juicer with Smart Features", 99.99));
+        products.add(new Product(298, "Electric Grill with Temperature Control", 89.99));
+        products.add(new Product(299, "Electric Fryer with Smart Features", 99.99));
+        products.add(new Product(300, "Electric Wok with Temperature Control", 69.99));
+        products.add(new Product(301, "Electric Fondue Pot with Temperature Control", 49.99));
+        products.add(new Product(302, "Electric Popcorn Maker with Smart Features", 39.99));
+        products.add(new Product(303, "Electric Ice Cream Maker with App", 99.99));
+        products.add(new Product(304, "Electric Yogurt Maker with App", 49.99));
+        products.add(new Product(305, "Electric Food Dehydrator with App", 79.99));
+        products.add(new Product(306, "Electric Egg Cooker with Timer", 29.99));
+        products.add(new Product(307, "Electric Rice Cooker with Smart Features", 59.99));
+        products.add(new Product(308, "Electric Pressure Cooker with App", 99.99));
+        products.add(new Product(309, "Electric Slow Cooker with Smart Features", 69.99));
+        products.add(new Product(310, "Electric Food Steamer with App", 49.99));
+        products.add(new Product(311, "Electric Griddle with Temperature Control", 59.99));
+        products.add(new Product(312, "Electric Sandwich Maker with Smart Features", 39.99));
+        products.add(new Product(313, "Electric Panini Press with Temperature Control", 49.99));
+        products.add(new Product(314, "Electric Waffle Maker with Smart Features", 39.99));
+        products.add(new Product(315, "Electric Crepe Maker with Temperature Control", 49.99));
+        products.add(new Product(316, "Electric Pizza Maker with Smart Features", 59.99));
+        products.add(new Product(317, "Electric Hot Dog Maker with Timer", 29.99));
+        products.add(new Product(318, "Electric Candy Floss Maker with App", 39.99));
+        products.add(new Product(319, "Electric Chocolate Fountain with Smart Features", 49.99));
+        products.add(new Product(320, "Electric Food Processor with Smart Features", 129.99));
+        products.add(new Product(321, "Electric Blender with Smart Features", 79.99));
+        products.add(new Product(322, "Electric Juicer with Smart Features", 99.99));
+        products.add(new Product(323, "Electric Mixer with Smart Features", 49.99));
+        products.add(new Product(324, "Electric Food Chopper with Smart Features", 39.99));
+        products.add(new Product(325, "Electric Meat Grinder with Smart Features", 149.99));
+        products.add(new Product(326, "Electric Pasta Maker with Smart Features", 99.99));
+        products.add(new Product(327, "Electric Ice Maker with Smart Features", 199.99));
+        products.add(new Product(328, "Electric Water Dispenser with Smart Features", 149.99));
+        products.add(new Product(329, "Electric Water Heater with Smart Features", 99.99));
+        products.add(new Product(330, "Smart Home Starter Kit", 199.99));
+        products.add(new Product(331, "Smart Light Bulb", 19.99));
+        products.add(new Product(332, "Smart Plug", 24.99));
+        products.add(new Product(333, "Smart Doorbell", 99.99));
+        products.add(new Product(334, "Smart Security Camera", 129.99));
+        products.add(new Product(335, "Smart Thermostat", 89.99));
+        products.add(new Product(336, "Smart Smoke Detector", 39.99));
+        products.add(new Product(337, "Smart Water Leak Detector", 29.99));
+        products.add(new Product(338, "Smart Garage Door Opener", 79.99));
+        products.add(new Product(339, "Smart Home Hub", 49.99));
+        products.add(new Product(340, "Smart Air Quality Monitor", 59.99));
+        products.add(new Product(341, "Smart Pet Feeder", 99.99));
+        products.add(new Product(342, "Smart Coffee Maker", 149.99));
+        products.add(new Product(343, "Smart Refrigerator", 1999.99));
+        products.add(new Product(344, "Smart Oven", 899.99));
+        products.add(new Product(345, "Smart Dishwasher", 799.99));
+        products.add(new Product(346, "Smart Washing Machine", 699.99));
+        products.add(new Product(347, "Smart Dryer", 699.99));
+        products.add(new Product(348, "Smart Air Purifier", 149.99));
+        products.add(new Product(349, "Smart Humidifier", 59.99));
+        products.add(new Product(350, "Smart Dehumidifier", 89.99));
+        
+        User loggedIn = getUser (loggedInUser );
 
         frame = new JFrame("Online Shopping Catalog");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -341,36 +541,51 @@ public class OnlineShoppingGUI {
         // Profile Panel
         JPanel profilePanel = new JPanel();
         profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
-        profilePanel.add(new JLabel("Username: " + loggedIn.username));
-        profilePanel.add(new JLabel("Gender: " + loggedIn.gender));
-        profilePanel.add(new JLabel("Country: " + loggedIn.country));
-        profilePanel.add(new JLabel("Age: " + loggedIn.age));
-        profilePanel.add(new JLabel("Phone Number: " + loggedIn.phoneNumber));
 
-        JButton toggleButton = new JButton("Show More Info");
-        JPanel extraInfoPanel = new JPanel();
-        extraInfoPanel.setLayout(new BoxLayout(extraInfoPanel, BoxLayout.Y_AXIS));
-        extraInfoPanel.add(new JLabel("This is additional profile info"));
+        // Editable fields for user profile
+        JTextField usernameField = new JTextField(loggedIn.username);
+        JTextField genderField = new JTextField(loggedIn.gender);
+        JTextField countryField = new JTextField(loggedIn.country);
+        JTextField ageField = new JTextField(String.valueOf(loggedIn.age));
+        JTextField phoneField = new JTextField(loggedIn.phoneNumber);
 
-        toggleButton.addActionListener(e -> {
-            if (extraInfoPanel.isVisible()) {
-                extraInfoPanel.setVisible(false);
-                toggleButton.setText("Show More Info");
-            } else {
-                extraInfoPanel.setVisible(true);
-                toggleButton.setText("Hide Info");
-            }
+        profilePanel.add(new JLabel("Username:"));
+        profilePanel.add(usernameField);
+        profilePanel.add(new JLabel("Gender:"));
+        profilePanel.add(genderField);
+        profilePanel.add(new JLabel("Country:"));
+        profilePanel.add(countryField);
+        profilePanel.add(new JLabel("Age:"));
+        profilePanel.add(ageField);
+        profilePanel.add(new JLabel("Phone Number:"));
+        profilePanel.add(phoneField);
+
+        JButton saveButton = new JButton("Save Changes");
+        saveButton.addActionListener(e -> {
+            // Update user information
+            loggedIn.username = usernameField.getText();
+            loggedIn.gender = genderField.getText();
+            loggedIn.country = countryField.getText();
+            loggedIn.age = Integer.parseInt(ageField.getText());
+            loggedIn.phoneNumber = phoneField.getText();
+
+            JOptionPane.showMessageDialog(frame, "Profile updated successfully!");
+
+            // Shrink the profile panel
+            profilePanel.setPreferredSize(new Dimension(300, 200)); // Set a smaller preferred size
+            profilePanel.revalidate(); // Revalidate the panel to apply the new size
+            profilePanel.repaint(); // Repaint the panel to reflect changes
         });
 
-        profilePanel.add(toggleButton);
-        profilePanel.add(extraInfoPanel);
-        extraInfoPanel.setVisible(false);
+        profilePanel.add(saveButton);
         tabbedPane.addTab("Profile", profilePanel);
 
+        // Address Panel
         JPanel addressPanel = new JPanel();
         addressPanel.add(new JLabel("Shipping Address: (To be updated soon)"));
         tabbedPane.addTab("Address", addressPanel);
 
+        // Sign Out Panel
         JPanel signOutPanel = new JPanel();
         JButton signOutButton = new JButton("Sign Out");
         signOutButton.setBackground(new Color(220, 20, 60));
@@ -404,7 +619,7 @@ public class OnlineShoppingGUI {
         buttonPanel.add(checkoutButton);
         cartPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // 🔍 Search Panel
+        // Search Panel
         JPanel searchPanel = new JPanel(new GridLayout(2, 4, 5, 5));
         JTextField nameField = new JTextField();
         JTextField minPriceField = new JTextField();
@@ -455,8 +670,7 @@ public class OnlineShoppingGUI {
         frame.add(searchPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
-}
-
+    }
 
     // Show Add Product Screen for sellers
     private void showAddProductScreen() {
