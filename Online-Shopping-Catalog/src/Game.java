@@ -762,11 +762,13 @@ public class OnlineShoppingGUI {
 
     // Helper methods to add products to the table and cart
     private void loadProducts() {
-        productTableModel.setRowCount(0);  // Clear existing table rows
-        for (Product product : products) {
-            productTableModel.addRow(new Object[]{product.getId(), product.getName(), product.getPrice()});
-        }
+    productTableModel.setRowCount(0);  // Clear existing table rows
+    for (Product product : products) {
+        // Format the price with a dollar sign
+        String formattedPrice = String.format("$%.2f", product.getPrice());
+        productTableModel.addRow(new Object[]{product.getId(), product.getName(), formattedPrice});
     }
+}
 
     private void addToCart() {
         int selectedRow = productTable.getSelectedRow();
