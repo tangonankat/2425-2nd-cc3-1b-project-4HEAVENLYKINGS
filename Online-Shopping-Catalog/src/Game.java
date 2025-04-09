@@ -27,7 +27,8 @@ public class OnlineShoppingGUI {
         String country;
         int age;
         String phoneNumber;
-
+        boolean restricted;  // Add this line
+    
         public User(String username, String password, String role, String gender, String country, int age, String phoneNumber) {
             this.username = username;
             this.password = password;
@@ -36,6 +37,7 @@ public class OnlineShoppingGUI {
             this.country = country;
             this.age = age;
             this.phoneNumber = phoneNumber;
+            this.restricted = false;  // Add this line
         }
     }
 
@@ -250,6 +252,134 @@ public class OnlineShoppingGUI {
             }
         }
         return false;
+    }
+
+    private void deleteUser(String username) {
+        if (username.equals(loggedInUser)) {
+            JOptionPane.showMessageDialog(frame, "Cannot delete currently logged in user", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        for (User user : users) {
+            if (user.username.equals(username)) {
+                int confirm = JOptionPane.showConfirmDialog(frame, 
+                    "Are you sure you want to delete user: " + username + "?", 
+                    "Confirm Delete", JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION) {
+                    users.remove(user);
+                    JOptionPane.showMessageDialog(frame, "User deleted successfully");
+                }
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(frame, "User not found", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void restrictUser(String username) {
+        if (username.equals(loggedInUser)) {
+            JOptionPane.showMessageDialog(frame, "Cannot restrict currently logged in user", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    
+        for (User user : users) {
+            if (user.username.equals(username)) {
+                if (user.restricted) {
+                    JOptionPane.showMessageDialog(frame, "User is already restricted", "Info", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    user.restricted = true;
+                    JOptionPane.showMessageDialog(frame, "User restricted successfully");
+                }
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(frame, "User not found", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void unrestrictUser(String username) {
+        for (User user : users) {
+            if (user.username.equals(username)) {
+                if (!user.restricted) {
+                    JOptionPane.showMessageDialog(frame, "User is not restricted", "Info", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    user.restricted = false;
+                    JOptionPane.showMessageDialog(frame, "User unrestricted successfully");
+                }
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(frame, "User not found", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    private void showAdminOptions() {
+        JPanel adminPanel = new JPanel();
+        adminPanel.setLayout(new BoxLayout(adminPanel, BoxLayout.Y_AXIS));
+    
+        JButton deleteUserButton = new JButton("Delete User");
+        JButton restrictUserButton = new JButton("Restrict User");
+        JButton unrestrictUserButton = new JButton("Unrestrict User");
+    
+        deleteUserButton.addActionListener(e -> showDeleteUserScreen());
+        restrictUserButton.addActionListener(e -> showRestrictUserScreen());
+        unrestrictUserButton.addActionListener(e -> showUnrestrictUserScreen());
+    
+        adminPanel.add(deleteUserButton);
+        adminPanel.add(restrictUserButton);
+        adminPanel.add(unrestrictUserButton);
+    
+        frame.add(adminPanel, BorderLayout.NORTH);
+        frame.revalidate();
+        frame.repaint();
+    }
+    
+    private void showDeleteUserScreen() {
+        String[] options = users.stream().map(u -> u.username).toArray(String[]::new);
+        String selectedUser = (String) JOptionPane.showInputDialog(frame, 
+            "Select User to Delete", "Delete User", 
+            JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        
+        if (selectedUser != null) {
+            deleteUser(selectedUser);
+        }
+    }
+    
+    private void showRestrictUserScreen() {
+        String[] options = users.stream()
+            .filter(u -> !u.username.equals(loggedInUser) && !u.restricted)
+            .map(u -> u.username)
+            .toArray(String[]::new);
+        
+        if (options.length == 0) {
+            JOptionPane.showMessageDialog(frame, "No users available to restrict", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+    
+        String selectedUser = (String) JOptionPane.showInputDialog(frame, 
+            "Select User to Restrict", "Restrict User", 
+            JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        
+        if (selectedUser != null) {
+            restrictUser(selectedUser);
+        }
+    }
+    
+    private void showUnrestrictUserScreen() {
+        String[] options = users.stream()
+            .filter(u -> u.restricted)
+            .map(u -> u.username)
+            .toArray(String[]::new);
+        
+        if (options.length == 0) {
+            JOptionPane.showMessageDialog(frame, "No restricted users found", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+    
+        String selectedUser = (String) JOptionPane.showInputDialog(frame, 
+            "Select User to Unrestrict", "Unrestrict User", 
+            JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        
+        if (selectedUser != null) {
+            unrestrictUser(selectedUser);
+        }
     }
 
     class Product {
@@ -482,6 +612,10 @@ public class OnlineShoppingGUI {
         // Seller functionality
         if (loggedIn.role.equals("Seller")) {
             showSellerOptions();
+        }
+        // Admin functionality
+        if (loggedIn.role.equals("Admin")) {
+            showAdminOptions();
         }
     }
 
