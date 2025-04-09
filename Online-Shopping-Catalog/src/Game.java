@@ -27,9 +27,11 @@ public class OnlineShoppingGUI {
         String country;
         int age;
         String phoneNumber;
-        boolean restricted;  // Add this line
+        boolean restricted;
+        String address;  // Add this line
     
-        public User(String username, String password, String role, String gender, String country, int age, String phoneNumber) {
+        public User(String username, String password, String role, String gender, 
+                   String country, int age, String phoneNumber) {
             this.username = username;
             this.password = password;
             this.role = role;
@@ -37,14 +39,15 @@ public class OnlineShoppingGUI {
             this.country = country;
             this.age = age;
             this.phoneNumber = phoneNumber;
-            this.restricted = false;  // Add this line
+            this.restricted = false;
+            this.address = "Not Set";  // Add this line
         }
     }
 
     public OnlineShoppingGUI() {
         users.add(new User("admin", "password", "Admin", "Male", "USA", 30, "123-456-7890"));
         users.add(new User("customer", "1234", "Customer", "Female", "Canada", 25, "987-654-3210"));
-        users.add(new User("seller", "5678", "Seller", "Male", "UK", 28, "555-555-5555")); // Added seller for testing
+        users.add(new User("seller", "5678", "Seller", "Male", "UK", 28, "555-555-5555"));
         showLoginScreen();
     }
 
@@ -428,8 +431,16 @@ public class OnlineShoppingGUI {
         validCoupons = new HashMap<>();
 
         // Initialize valid coupons
-        validCoupons.put("IND10", 10.0); // 10% discount
-        validCoupons.put("IND20", 20.0); // 20% discount
+        validCoupons.put("D5", 10.0); // 5% discount
+        validCoupons.put("D10", 20.0); // 10% discount
+        validCoupons.put("D15", 10.0); // 15% discount
+        validCoupons.put("D20", 20.0); // 20% discount
+        validCoupons.put("D25", 10.0); // 25% discount
+        validCoupons.put("D30", 20.0); // 30% discount
+        validCoupons.put("D35", 10.0); // 35% discount
+        validCoupons.put("D40", 20.0); // 40% discount
+        validCoupons.put("D45", 10.0); // 45% discount
+        validCoupons.put("D50", 20.0); // 50% discount
         // Add more coupons as needed
 
         // Sample products with stock levels
@@ -487,11 +498,11 @@ public class OnlineShoppingGUI {
         profilePanel.add(saveButton);
         dashboardContent.add(profilePanel);
 
-        // Address Panel
+        // Address Panel (updated)
         JPanel addressPanel = new JPanel();
-        addressPanel.add(new JLabel("Shipping Address: (To be updated soon)"));
+        addressPanel.add(new JLabel("Current Shipping Address: " + loggedIn.address));
         dashboardContent.add(addressPanel);
-
+        
         // Sign Out Panel
         JPanel signOutPanel = new JPanel();
         JButton signOutButton = new JButton("Sign Out");
