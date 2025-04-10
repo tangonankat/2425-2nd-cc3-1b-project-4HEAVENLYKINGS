@@ -12,13 +12,77 @@ import java.util.Date;
 import java.io.*;
 
 public class OnlineShoppingGUI {
-    // Dark mode properties
+    // UI styling properties
     private boolean darkMode = false;
-    private static final Color DARK_BG = new Color(30, 30, 30);
-    private static final Color DARK_TEXT = new Color(240, 240, 240);
-    private static final Color DARK_ACCENT = new Color(0, 122, 204);
-    private static final Color DARK_BORDER = new Color(60, 60, 60);
-    private static final Color DARK_MENU_BG = new Color(45, 45, 45);
+    
+    // Light mode colors
+    private static final Color LIGHT_BG = new Color(248, 249, 250);
+    private static final Color LIGHT_TEXT = new Color(33, 37, 41);
+    private static final Color LIGHT_ACCENT = new Color(13, 110, 253);
+    private static final Color LIGHT_SECONDARY = new Color(108, 117, 125);
+    private static final Color LIGHT_BORDER = new Color(222, 226, 230);
+    private static final Color LIGHT_PANEL_BG = new Color(255, 255, 255);
+    private static final Color LIGHT_SUCCESS = new Color(25, 135, 84);
+    private static final Color LIGHT_WARNING = new Color(255, 193, 7);
+    private static final Color LIGHT_DANGER = new Color(220, 53, 69);
+    private static final Color LIGHT_HOVER = new Color(10, 88, 202);
+    
+    // UI Helper Methods
+    private JButton createStyledButton(String text, Color bgColor, Color hoverColor) {
+        JButton button = new JButton(text);
+        button.setBackground(bgColor);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.WHITE, 2),
+            BorderFactory.createEmptyBorder(10, 20, 10, 20)
+        ));
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(hoverColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color.WHITE, 2),
+                    BorderFactory.createEmptyBorder(10, 20, 10, 20)
+                ));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(bgColor);
+                button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color.WHITE, 2),
+                    BorderFactory.createEmptyBorder(10, 20, 10, 20)
+                ));
+            }
+        });
+        return button;
+    }
+    
+    private JPanel createStyledPanel(String title) {
+        JPanel panel = new JPanel();
+        panel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEmptyBorder(10, 10, 10, 10), 
+            title
+        ));
+        panel.setLayout(new GridBagLayout());
+        return panel;
+    }
+    
+    // Dark mode colors
+    private static final Color DARK_BG = new Color(33, 37, 41);
+    private static final Color DARK_TEXT = new Color(248, 249, 250);
+    private static final Color DARK_ACCENT = new Color(13, 110, 253);
+    private static final Color DARK_SECONDARY = new Color(173, 181, 189);
+    private static final Color DARK_BORDER = new Color(73, 80, 87);
+    private static final Color DARK_PANEL_BG = new Color(52, 58, 64);
+    private static final Color DARK_SUCCESS = new Color(25, 135, 84);
+    private static final Color DARK_WARNING = new Color(255, 193, 7);
+    private static final Color DARK_DANGER = new Color(220, 53, 69);
+    
+    // Fonts
+    private static final Font HEADER_FONT = new Font("Segoe UI", Font.BOLD, 18);
+    private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 16);
+    private static final Font BODY_FONT = new Font("Segoe UI", Font.PLAIN, 14);
+    private static final Font SMALL_FONT = new Font("Segoe UI", Font.PLAIN, 12);
     
     private JFrame frame;
     private JTable productTable;
@@ -541,19 +605,33 @@ public class OnlineShoppingGUI {
         }
     }
 
-    class Product implements Serializable {
-        private static final long serialVersionUID = 1L;
-        private int id;
-        private String name;
-        private double price;
-        private int stock;
+class Product implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private int id;
+    private String name;
+    private double price;
+    private int stock;
+    private String imagePath;
 
-        public Product(int id, String name, double price, int stock) {
-            this.id = id;
-            this.name = name;
-            this.price = price;
-            this.stock = stock;
-        }
+    public Product(int id, String name, double price, int stock) {
+        this(id, name, price, stock, "images/default.png");
+    }
+
+    public Product(int id, String name, double price, int stock, String imagePath) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.stock = stock;
+        this.imagePath = imagePath;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
 
         public int getId() {
             return id;
@@ -607,10 +685,10 @@ public class OnlineShoppingGUI {
         if (currentUser != null) {
             darkMode = currentUser.darkMode;
             
-            Color bgColor = darkMode ? DARK_BG : Color.WHITE;
-            Color textColor = darkMode ? DARK_TEXT : Color.BLACK;
-            Color accentColor = darkMode ? DARK_ACCENT : new Color(70, 130, 180);
-            Color panelBgColor = darkMode ? DARK_MENU_BG : new Color(240, 240, 240);
+            Color bgColor = darkMode ? DARK_BG : LIGHT_BG;
+            Color textColor = darkMode ? DARK_TEXT : LIGHT_TEXT;
+            Color accentColor = darkMode ? DARK_ACCENT : LIGHT_ACCENT;
+            Color panelBgColor = darkMode ? DARK_PANEL_BG : LIGHT_PANEL_BG;
             
             // Apply to main frame and all components recursively
             applyDarkModeToComponent(frame.getContentPane(), bgColor, textColor, accentColor, panelBgColor);
@@ -643,9 +721,14 @@ public class OnlineShoppingGUI {
             ((JLabel)component).setForeground(textColor);
         } else if (component instanceof JButton) {
             JButton button = (JButton) component;
-            button.setBackground(accentColor);
-            button.setForeground(Color.WHITE);
-            button.setBorder(BorderFactory.createLineBorder(darkMode ? DARK_BORDER : Color.LIGHT_GRAY));
+            if (darkMode) {
+                button.setBackground(accentColor);
+                button.setForeground(Color.WHITE);
+            } else {
+                button.setBackground(LIGHT_ACCENT);
+                button.setForeground(Color.WHITE);
+            }
+            button.setBorder(BorderFactory.createLineBorder(darkMode ? DARK_BORDER : LIGHT_ACCENT, 2));
         } else if (component instanceof JTextField || component instanceof JSpinner) {
             component.setBackground(panelBgColor);
             component.setForeground(textColor);
