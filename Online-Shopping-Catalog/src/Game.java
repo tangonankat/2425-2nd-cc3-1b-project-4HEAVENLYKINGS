@@ -253,7 +253,26 @@ public class OnlineShoppingGUI {
                 if (authenticate(username, password, role)) {
                     loggedInUser = username;
                     loginFrame.dispose();
-                    showMainScreen();
+                    // Create and show loading screen
+                    JFrame loadingFrame = new JFrame("Loading");
+                    loadingFrame.setSize(300, 100);
+                    loadingFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+                    loadingFrame.setLayout(new BorderLayout());
+                    loadingFrame.add(new JLabel("Loading, please wait...", JLabel.CENTER), BorderLayout.CENTER);
+                    loadingFrame.setLocationRelativeTo(null);
+                    loadingFrame.setVisible(true);
+                    
+                    // Use a timer to simulate loading and then show main screen
+                    Timer timer = new Timer(2000, new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent evt) {
+                            ((Timer)evt.getSource()).stop();
+                            loadingFrame.dispose(); // Dispose loading frame
+                            showMainScreen();
+                        }
+                    });
+                    timer.setRepeats(false);
+                    timer.start();
                 } else {
                     JOptionPane.showMessageDialog(loginFrame, "Invalid login credentials", "Error", JOptionPane.ERROR_MESSAGE);
                 }
