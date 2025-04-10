@@ -100,6 +100,8 @@ public class OnlineShoppingGUI {
     private JTable historyTable; // Table for purchase history
     private DefaultTableModel historyModel; // Model for purchase history
     private JPanel cartPanel; // Panel for shopping cart
+    private JComboBox<String> productCategoryCombo; // Combo box for product categories
+    private JTextField newCategoryField; // Field for adding new categories
 
     class Purchase {
         String customer;
@@ -709,6 +711,10 @@ public class OnlineShoppingGUI {
         loadProductsFromFile();
         cart = new ArrayList<>();
         validCoupons = new HashMap<>();
+        
+        // Initialize category components
+        productCategoryCombo = new JComboBox<>(new String[]{"Electronics", "Clothing", "Home", "Books", "Other"});
+        newCategoryField = new JTextField(15);
 
         // Initialize valid coupons with correct discount percentages
         validCoupons.put("D5", 5.0); // 5% discount
@@ -1072,6 +1078,7 @@ public class OnlineShoppingGUI {
         JButton addProductButton = new JButton("Add Product");
         JButton removeProductButton = new JButton("Remove Product");
         JButton modifyPriceButton = new JButton("Modify Product Price");
+        JButton categoryStatsButton = new JButton("Category Statistics");
 
         addProductButton.addActionListener((ActionEvent e) -> showAddProductScreen());
         removeProductButton.addActionListener((ActionEvent e) -> showRemoveProductScreen());
@@ -1080,15 +1087,37 @@ public class OnlineShoppingGUI {
         sellerPanel.add(addProductButton);
         sellerPanel.add(removeProductButton);
         sellerPanel.add(modifyPriceButton);
+        sellerPanel.add(categoryStatsButton);
+        
+        categoryStatsButton.addActionListener(e -> showCategoryStats());
 
         frame.add(sellerPanel, BorderLayout.NORTH);
         frame.revalidate();
         frame.repaint();
     }
 
+    private void showCategoryStats() {
+        Map<String, Integer> categoryCounts = new HashMap<>();
+        Map<String, Double> categoryTotals = new HashMap<>();
+        
+        for (Product product : products) {
+            String category = product.getCategory();
+            categoryCounts.put(category, categoryCounts.getOrDefault(category, 0) + 1);
+            categoryTotals.put(category, categoryTotals.getOrDefault(category, 0.0) + product.getPrice());
+        }
+        
+        StringBuilder stats = new StringBuilder("Category Statistics:\n");
+        for (String category : categoryCounts.keySet()) {
+            stats.append(String.format("%s: %d products, Total value: $%.2f\n", 
+                category, categoryCounts.get(category), categoryTotals.get(category)));
+        }
+        
+        JOptionPane.showMessageDialog(frame, stats.toString(), "Category Statistics", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     private void showAddProductScreen() {
         JFrame addProductFrame = new JFrame("Add Product");
-        addProductFrame.setSize(300, 200);
+        addProductFrame.setSize(350, 300);
         addProductFrame.setLayout(new BorderLayout());
         addProductFrame.getContentPane().setBackground(new Color(255, 255, 224));
 
@@ -1097,15 +1126,52 @@ public class OnlineShoppingGUI {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Product Name
         JLabel productNameLabel = new JLabel("Product Name:");
         JTextField productNameField = new JTextField(15);
+
+        // Category Selection
+        JLabel categoryLabel = new JLabel("Category:");
+        productCategoryCombo = new JComboBox<>(new String[]{"Electronics", "Clothing", "Home", "Books", "Other", "New Category..."});
+        newCategoryField = new JTextField(15);
+        newCategoryField.setVisible(false);
+        
+        productCategoryCombo.addActionListener(e -> {
+            if ("New Category...".equals(productCategoryCombo.getSelectedItem())) {
+                newCategoryField.setVisible(true);
+                newCategoryField.setText("");
+            } else {
+                newCategoryField.setVisible(false);
+            }
+        });
+
+        // Price and Stock
         JLabel productPriceLabel = new JLabel("Price:");
         JTextField productPriceField = new JTextField(15);
         JLabel productStockLabel = new JLabel("Stock:");
         JTextField productStockField = new JTextField(15);
-        JButton addButton = new JButton("Add Product");
 
+        // Buttons
+        JButton addButton = new JButton("Add Product");
+        JButton statsButton = new JButton("Category Stats");
+        statsButton.addActionListener(e -> showCategoryStats());
+        
         addButton.addActionListener(event -> {
+            String category;
+            if ("New Category...".equals(productCategoryCombo.getSelectedItem())) {
+                category = newCategoryField.getText().trim();
+                if (category.isEmpty()) {
+                    JOptionPane.showMessageDialog(addProductFrame, "Please enter a new category name", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                // Validate new category name
+                if (category.length() < 3 || category.length() > 20) {
+                    JOptionPane.showMessageDialog(addProductFrame, "Category name must be between 3-20 characters", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else {
+                category = (String)productCategoryCombo.getSelectedItem();
+            }
             try {
                 String name = productNameField.getText().trim();
                 if (name.isEmpty()) {
@@ -1126,16 +1192,26 @@ public class OnlineShoppingGUI {
                     return;
                 }
 
-                products.add(new Product(products.size() + 1, name, price, stock));
+                // Create product with category
+                Product newProduct = new Product(products.size() + 1, name, price, stock);
+                newProduct.setCategory(category); // Set the category
+                products.add(newProduct);
+                
                 loadProducts();
                 refreshAllProductViews();
-                JOptionPane.showMessageDialog(addProductFrame, "Product added successfully!");
+                JOptionPane.showMessageDialog(addProductFrame, 
+                    "Product added successfully!\n" +
+                    "Name: " + name + "\n" +
+                    "Category: " + category + "\n" +
+                    "Price: $" + price + "\n" +
+                    "Stock: " + stock);
                 addProductFrame.dispose();
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(addProductFrame, "Invalid number format for price or stock", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
+        // Layout components
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(productNameLabel, gbc);
@@ -1144,20 +1220,35 @@ public class OnlineShoppingGUI {
 
         gbc.gridx = 0;
         gbc.gridy = 1;
+        panel.add(categoryLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(productCategoryCombo, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        panel.add(new JLabel("New Category:"), gbc);
+        gbc.gridx = 1;
+        panel.add(newCategoryField, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         panel.add(productPriceLabel, gbc);
         gbc.gridx = 1;
         panel.add(productPriceField, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 4;
         panel.add(productStockLabel, gbc);
         gbc.gridx = 1;
         panel.add(productStockField, gbc);
 
         gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;
+        gbc.gridy = 5;
+        gbc.gridwidth = 1;
         panel.add(addButton, gbc);
+        
+        gbc.gridx = 1;
+        panel.add(statsButton, gbc);
 
         addProductFrame.add(panel, BorderLayout.CENTER);
         addProductFrame.setVisible(true);
