@@ -35,6 +35,7 @@ public class OnlineShoppingGUI {
     private JScrollPane historyScroll; // Scroll pane for purchase history
     private JTable historyTable; // Table for purchase history
     private DefaultTableModel historyModel; // Model for purchase history
+    private JPanel cartPanel; // Panel for shopping cart
 
     class Purchase {
         String customer;
@@ -826,16 +827,20 @@ public class OnlineShoppingGUI {
             }
         });
 
-        JPanel cartPanel = new JPanel(new BorderLayout());
-        cartPanel.add(new JScrollPane(cartList), BorderLayout.CENTER);
+        // Initialize cartPanel (will be empty for sellers)
+        cartPanel = new JPanel(new BorderLayout());
+        
+        if (!loggedIn.role.equals("Seller")) {
+            cartPanel.add(new JScrollPane(cartList), BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 5, 5));
-        buttonPanel.add(new JLabel("Quantity:"));
-        buttonPanel.add(quantitySpinner);
-        buttonPanel.add(addToCartButton);
-        buttonPanel.add(removeFromCartButton);
-        buttonPanel.add(checkoutButton);
-        cartPanel.add(buttonPanel, BorderLayout.SOUTH);
+            JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 5, 5));
+            buttonPanel.add(new JLabel("Quantity:"));
+            buttonPanel.add(quantitySpinner);
+            buttonPanel.add(addToCartButton);
+            buttonPanel.add(removeFromCartButton);
+            buttonPanel.add(checkoutButton);
+            cartPanel.add(buttonPanel, BorderLayout.SOUTH);
+        }
 
         // Coupon Panel
         JPanel couponPanel = new JPanel();
