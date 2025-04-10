@@ -624,61 +624,6 @@ public class OnlineShoppingGUI {
         }
     }
 
-class Product implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private int id;
-    private String name;
-    private double price;
-    private int stock;
-    private String imagePath;
-
-    public Product(int id, String name, double price, int stock) {
-        this(id, name, price, stock, "images/default.png");
-    }
-
-    public Product(int id, String name, double price, int stock, String imagePath) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.stock = stock;
-        this.imagePath = imagePath;
-    }
-
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
-
-        public int getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public double getPrice() {
-            return price;
-        }
-
-        public int getStock() {
-            return stock;
-        }
-
-        public void reduceStock(int quantity) {
-            if (stock >= quantity) {
-                stock -= quantity;
-            }
-        }
-
-        public void setPrice(double price) {
-            this.price = price;
-        }
-    }
-
     private void saveProductsToFile() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("products.dat"))) {
             oos.writeObject(products);
@@ -778,10 +723,8 @@ class Product implements Serializable {
         validCoupons.put("D50", 50.0); // 50% discount
         // Add more coupons as needed
 
-        // Sample products with stock levels
-        products.add(new Product(101, "Laptop", 1200.00, 5)); // 5 units in stock
-        products.add(new Product(102, "Smartphone", 800.00, 0)); // Out of stock
-        // Add more products as needed...
+        // Products are loaded from file in loadProductsFromFile()
+        // Only add new products here if needed
 
         User loggedIn = getUser (loggedInUser  );
 
@@ -822,8 +765,9 @@ class Product implements Serializable {
         JTextField countryField = new JTextField(loggedIn.country);
         JTextField ageField = new JTextField(String.valueOf(loggedIn.age));
         JTextField phoneField = new JTextField(loggedIn.phoneNumber);
+        JTextField addressField = new JTextField(loggedIn.address);
 
-        profilePanel.add(new JLabel("Username:"));
+        profilePanel.add(new JLabel("Username:")); 
         profilePanel.add(usernameField);
         profilePanel.add(new JLabel("Gender:"));
         profilePanel.add(genderField);
@@ -833,6 +777,8 @@ class Product implements Serializable {
         profilePanel.add(ageField);
         profilePanel.add(new JLabel("Phone Number:"));
         profilePanel.add(phoneField);
+        profilePanel.add(new JLabel("Address:"));
+        profilePanel.add(addressField);
         profilePanel.add(darkModeToggle);
 
         JButton saveButton = new JButton("Save Changes");
@@ -844,7 +790,16 @@ class Product implements Serializable {
                 loggedIn.country = countryField.getText();
                 loggedIn.age = Integer.parseInt(ageField.getText());
                 loggedIn.phoneNumber = phoneField.getText();
+                loggedIn.address = addressField.getText();
                 JOptionPane.showMessageDialog(frame, "Profile updated successfully!");
+                // Update address display
+                JPanel addressPanel = findAddressPanel(dashboardContent);
+                if (addressPanel != null) {
+                    addressPanel.removeAll();
+                    addressPanel.add(new JLabel("Current Shipping Address: " + loggedIn.address));
+                    addressPanel.revalidate();
+                    addressPanel.repaint();
+                }
             }
         });
 
@@ -863,8 +818,27 @@ class Product implements Serializable {
 
         // Address Panel (updated)
         JPanel addressPanel = new JPanel();
+        addressPanel.setName("addressPanel");
         addressPanel.add(new JLabel("Current Shipping Address: " + loggedIn.address));
         dashboardContent.add(addressPanel);
+        
+        // Address update button
+        JButton updateAddressButton = new JButton("Update Address");
+        updateAddressButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String newAddress = JOptionPane.showInputDialog(frame, "Enter new shipping address:");
+                if (newAddress != null && !newAddress.trim().isEmpty()) {
+                    loggedIn.address = newAddress;
+                    addressPanel.removeAll();
+                    addressPanel.add(new JLabel("Current Shipping Address: " + loggedIn.address));
+                    addressPanel.revalidate();
+                    addressPanel.repaint();
+                    JOptionPane.showMessageDialog(frame, "Address updated successfully!");
+                }
+            }
+        });
+        dashboardContent.add(updateAddressButton);
         
         // Sign Out Panel
         JPanel signOutPanel = new JPanel();
@@ -1215,13 +1189,32 @@ class Product implements Serializable {
         loadProducts();
     }
 
+    // Helper method to find the address panel in dashboard content
+    private JPanel findAddressPanel(Container container) {
+        for (Component comp : container.getComponents()) {
+            if (comp instanceof JPanel && comp.getName() != null && comp.getName().equals("addressPanel")) {
+                return (JPanel)comp;
+            }
+            if (comp instanceof Container) {
+                JPanel found = findAddressPanel((Container)comp);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
     private void loadProducts() {
         productTableModel.setRowCount(0);  // Clear existing table rows
         for (Product product : products) {
             // Format the price with a dollar sign
             String formattedPrice = String.format("$%.2f", product.getPrice());
-            productTableModel.addRow(new Object[]{product.getId(), product.getName(), formattedPrice, product.getStock()});
+            Object[] row = {product.getId(), product.getName(), formattedPrice, product.getStock()};
+            System.out.println("Loading product: " + product.getName() + " stock=" + product.getStock());
+            productTableModel.addRow(row);
         }
+        productTableModel.fireTableDataChanged(); // Force table refresh
     }
 
     private void addToCart() {
