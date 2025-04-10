@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.io.File;
 
 public class Product implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -9,13 +10,20 @@ public class Product implements Serializable {
     private double originalPrice; // For sale/discount tracking
     private int stock;
     private int minStockThreshold = 5; // Reorder point
-    private String imagePath;
+    private String imagePath; // Relative path to image file
     private String category;
     private double averageRating;
     private int reviewCount;
 
     public Product(int id, String name, double price, int stock) {
         this(id, name, price, stock, "images/default.png");
+    }
+    
+    // Helper method to check if image exists
+    public boolean hasImage() {
+        if (imagePath == null || imagePath.isEmpty()) return false;
+        File imgFile = new File(imagePath);
+        return imgFile.exists() && !imgFile.isDirectory();
     }
 
     public Product(int id, String name, double price, int stock, String imagePath) {
