@@ -1,23 +1,70 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.io.*;
 
 public class OnlineShoppingGUI {
+    // Dark mode properties
+    private boolean darkMode = false;
+    private static final Color DARK_BG = new Color(30, 30, 30);
+    private static final Color DARK_TEXT = new Color(240, 240, 240);
+    private static final Color DARK_ACCENT = new Color(0, 122, 204);
+    private static final Color DARK_BORDER = new Color(60, 60, 60);
+    private static final Color DARK_MENU_BG = new Color(45, 45, 45);
+    
     private JFrame frame;
     private JTable productTable;
     private DefaultTableModel productTableModel;
     private DefaultListModel<String> cartModel;
     private List<Product> products;
     private List<Product> cart;
-    private String loggedInUser  ;
+    private String loggedInUser;
     private List<User> users = new ArrayList<>();
     private JSpinner quantitySpinner; // Spinner for quantity input
     private JTextField couponField; // Field for entering coupon code
     private Map<String, Double> validCoupons; // Map to store valid coupons
+    private List<Purchase> purchases = new ArrayList<>(); // List to track all purchases
+    private JScrollPane historyScroll; // Scroll pane for purchase history
+    private JTable historyTable; // Table for purchase history
+    private DefaultTableModel historyModel; // Model for purchase history
+
+    class Purchase {
+        String customer;
+        List<Product> items;
+        double total;
+        long timestamp;
+        String paymentMethod;
+        String status;
+
+        public Purchase(String customer, List<Product> items, double total, String paymentMethod) {
+            this.customer = customer;
+            this.items = new ArrayList<>(items);
+            this.total = total;
+            this.timestamp = System.currentTimeMillis();
+            this.paymentMethod = paymentMethod;
+            this.status = "Completed";
+        }
+
+        public String getFormattedDate() {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date(timestamp));
+        }
+
+        public String getItemsSummary() {
+            StringBuilder summary = new StringBuilder();
+            for (Product item : items) {
+                summary.append(item.getName()).append(" ($").append(item.getPrice()).append("), ");
+            }
+            return summary.length() > 0 ? summary.substring(0, summary.length() - 2) : "";
+        }
+    }
 
     class User {
         String username;
@@ -28,7 +75,11 @@ public class OnlineShoppingGUI {
         int age;
         String phoneNumber;
         boolean restricted;
-        String address;  // Add this line
+        String restrictionType; // "PERMANENT" or "TEMPORARY"
+        long restrictionDate; // timestamp when restricted
+        int restrictionDuration; // days for temporary ban
+        String address;
+        boolean darkMode;
     
         public User(String username, String password, String role, String gender, 
                    String country, int age, String phoneNumber) {
@@ -41,6 +92,34 @@ public class OnlineShoppingGUI {
             this.phoneNumber = phoneNumber;
             this.restricted = false;
             this.address = "Not Set";  // Add this line
+        }
+
+        public boolean isRestrictionExpired() {
+            if (!restricted || restrictionType.equals("PERMANENT")) {
+                return false;
+            }
+            long currentTime = System.currentTimeMillis();
+            long restrictionEndTime = restrictionDate + (restrictionDuration * 24L * 60 * 60 * 1000);
+            return currentTime > restrictionEndTime;
+        }
+
+        public String getRestrictionMessage() {
+            if (!restricted) return "";
+            
+            if (restrictionType.equals("PERMANENT")) {
+                return "Your account has been permanently restricted.";
+            } else {
+                long currentTime = System.currentTimeMillis();
+                long restrictionEndTime = restrictionDate + (restrictionDuration * 24L * 60 * 60 * 1000);
+                long remainingDays = (restrictionEndTime - currentTime) / (24 * 60 * 60 * 1000);
+                
+                if (remainingDays <= 0) {
+                    return "Your temporary restriction has expired. Please try logging in again.";
+                } else {
+                    return "Your account is temporarily restricted for " + restrictionDuration + 
+                           " days. " + remainingDays + " days remaining.";
+                }
+            }
         }
     }
 
@@ -77,11 +156,14 @@ public class OnlineShoppingGUI {
 
         JCheckBox showPasswordCheckBox = new JCheckBox("Show Password");
         showPasswordCheckBox.setBackground(new Color(173, 216, 230));
-        showPasswordCheckBox.addActionListener(e -> {
-            if (showPasswordCheckBox.isSelected()) {
-                passField.setEchoChar((char) 0);  // Show password
-            } else {
-                passField.setEchoChar('*');  // Hide password
+        showPasswordCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (showPasswordCheckBox.isSelected()) {
+                    passField.setEchoChar((char) 0);  // Show password
+                } else {
+                    passField.setEchoChar('*');  // Hide password
+                }
             }
         });
 
@@ -97,20 +179,28 @@ public class OnlineShoppingGUI {
         registerButton.setBackground(new Color(34, 139, 34));
         registerButton.setForeground(Color.WHITE);
 
-        loginButton.addActionListener(e -> {
-            String username = userField.getText();
-            String password = new String(passField.getPassword());
-            String role = (String) roleComboBox.getSelectedItem();
-            if (authenticate(username, password, role)) {
-                loggedInUser   = username;
-                loginFrame.dispose();
-                showMainScreen();
-            } else {
-                JOptionPane.showMessageDialog(loginFrame, "Invalid login credentials", "Error", JOptionPane.ERROR_MESSAGE);
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = userField.getText();
+                String password = new String(passField.getPassword());
+                String role = (String) roleComboBox.getSelectedItem();
+                if (authenticate(username, password, role)) {
+                    loggedInUser = username;
+                    loginFrame.dispose();
+                    showMainScreen();
+                } else {
+                    JOptionPane.showMessageDialog(loginFrame, "Invalid login credentials", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
-        registerButton.addActionListener(e -> showRegisterScreen());
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showRegisterScreen();
+            }
+        });
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -178,11 +268,14 @@ public class OnlineShoppingGUI {
 
         JCheckBox showPasswordCheckBox = new JCheckBox("Show Password");
         showPasswordCheckBox.setBackground(new Color(224, 255, 255));
-        showPasswordCheckBox.addActionListener(e -> {
-            if (showPasswordCheckBox.isSelected()) {
-                passField.setEchoChar((char) 0);  // Show password
-            } else {
-                passField.setEchoChar('*');  // Hide password
+        showPasswordCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (showPasswordCheckBox.isSelected()) {
+                    passField.setEchoChar((char) 0);  // Show password
+                } else {
+                    passField.setEchoChar('*');  // Hide password
+                }
             }
         });
 
@@ -190,26 +283,29 @@ public class OnlineShoppingGUI {
         submitButton.setBackground(new Color(34, 139, 34));
         submitButton.setForeground(Color.WHITE);
 
-        submitButton.addActionListener(e -> {
-            String username = userField.getText();
-            String password = new String(passField.getPassword());
-            String role = (String) roleComboBox.getSelectedItem();
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = userField.getText();
+                String password = new String(passField.getPassword());
+                String role = (String) roleComboBox.getSelectedItem();
 
-            if (username.isEmpty() || password.isEmpty()) {
-                JOptionPane.showMessageDialog(registerFrame, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            for (User   user : users) {
-                if (user.username.equals(username)) {
-                    JOptionPane.showMessageDialog(registerFrame, "Username already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                if (username.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(registerFrame, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-            }
 
-            users.add(new User(username, password, role, "Not Set", "Not Set", 0, "Not Set"));
-            JOptionPane.showMessageDialog(registerFrame, "Registration successful!");
-            registerFrame.dispose();
+                for (User user : users) {
+                    if (user.username.equals(username)) {
+                        JOptionPane.showMessageDialog(registerFrame, "Username already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }
+
+                users.add(new User(username, password, role, "Not Set", "Not Set", 0, "Not Set"));
+                JOptionPane.showMessageDialog(registerFrame, "Registration successful!");
+                registerFrame.dispose();
+            }
         });
 
         gbc.gridx = 0;
@@ -278,7 +374,7 @@ public class OnlineShoppingGUI {
         JOptionPane.showMessageDialog(frame, "User not found", "Error", JOptionPane.ERROR_MESSAGE);
     }
     
-    private void restrictUser(String username) {
+    private void restrictUser(String username, String restrictionType, int durationDays) {
         if (username.equals(loggedInUser)) {
             JOptionPane.showMessageDialog(frame, "Cannot restrict currently logged in user", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -290,7 +386,15 @@ public class OnlineShoppingGUI {
                     JOptionPane.showMessageDialog(frame, "User is already restricted", "Info", JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     user.restricted = true;
-                    JOptionPane.showMessageDialog(frame, "User restricted successfully");
+                    user.restrictionType = restrictionType;
+                    user.restrictionDate = System.currentTimeMillis();
+                    user.restrictionDuration = durationDays;
+                    String message = "User restricted successfully (" + restrictionType;
+                    if (restrictionType.equals("TEMPORARY")) {
+                        message += " for " + durationDays + " days";
+                    }
+                    message += ")";
+                    JOptionPane.showMessageDialog(frame, message);
                 }
                 return;
             }
@@ -321,9 +425,24 @@ public class OnlineShoppingGUI {
         JButton restrictUserButton = new JButton("Restrict User");
         JButton unrestrictUserButton = new JButton("Unrestrict User");
     
-        deleteUserButton.addActionListener(e -> showDeleteUserScreen());
-        restrictUserButton.addActionListener(e -> showRestrictUserScreen());
-        unrestrictUserButton.addActionListener(e -> showUnrestrictUserScreen());
+        deleteUserButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showDeleteUserScreen();
+            }
+        });
+        restrictUserButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showRestrictUserScreen();
+            }
+        });
+        unrestrictUserButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showUnrestrictUserScreen();
+            }
+        });
     
         adminPanel.add(deleteUserButton);
         adminPanel.add(restrictUserButton);
@@ -361,7 +480,43 @@ public class OnlineShoppingGUI {
             JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
         
         if (selectedUser != null) {
-            restrictUser(selectedUser);
+            // Create panel for restriction options
+            JPanel panel = new JPanel(new GridLayout(3, 1));
+            panel.add(new JLabel("Restriction Type:"));
+            
+            ButtonGroup typeGroup = new ButtonGroup();
+            JRadioButton permanentBtn = new JRadioButton("Permanent");
+            JRadioButton temporaryBtn = new JRadioButton("Temporary");
+            typeGroup.add(permanentBtn);
+            typeGroup.add(temporaryBtn);
+            panel.add(permanentBtn);
+            panel.add(temporaryBtn);
+            permanentBtn.setSelected(true);
+            
+            JSpinner durationSpinner = new JSpinner(new SpinnerNumberModel(7, 1, 365, 1));
+            panel.add(new JLabel("Duration (days):"));
+            panel.add(durationSpinner);
+            durationSpinner.setVisible(false);
+            
+        temporaryBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                durationSpinner.setVisible(true);
+            }
+        });
+        permanentBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                durationSpinner.setVisible(false);
+            }
+        });
+            
+            int result = JOptionPane.showConfirmDialog(frame, panel, 
+                "Restriction Options", JOptionPane.OK_CANCEL_OPTION);
+            
+            if (result == JOptionPane.OK_OPTION) {
+                String restrictionType = permanentBtn.isSelected() ? "PERMANENT" : "TEMPORARY";
+                int duration = permanentBtn.isSelected() ? 0 : (int)durationSpinner.getValue();
+                restrictUser(selectedUser, restrictionType, duration);
+            }
         }
     }
     
@@ -385,7 +540,8 @@ public class OnlineShoppingGUI {
         }
     }
 
-    class Product {
+    class Product implements Serializable {
+        private static final long serialVersionUID = 1L;
         private int id;
         private String name;
         private double price;
@@ -425,22 +581,98 @@ public class OnlineShoppingGUI {
         }
     }
 
+    private void saveProductsToFile() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("products.dat"))) {
+            oos.writeObject(products);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadProductsFromFile() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("products.dat"))) {
+            products = (List<Product>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            // If file doesn't exist or error occurs, start with default products
+            products = new ArrayList<>();
+            products.add(new Product(101, "Laptop", 1200.00, 5));
+            products.add(new Product(102, "Smartphone", 800.00, 0));
+        }
+    }
+
+    private void applyDarkMode() {
+        User currentUser = getUser(loggedInUser);
+        if (currentUser != null) {
+            darkMode = currentUser.darkMode;
+            
+            Color bgColor = darkMode ? DARK_BG : Color.WHITE;
+            Color textColor = darkMode ? DARK_TEXT : Color.BLACK;
+            Color accentColor = darkMode ? DARK_ACCENT : new Color(70, 130, 180);
+            Color panelBgColor = darkMode ? DARK_MENU_BG : new Color(240, 240, 240);
+            
+            // Apply to main frame and all components recursively
+            applyDarkModeToComponent(frame.getContentPane(), bgColor, textColor, accentColor, panelBgColor);
+            
+            // Special handling for tables
+            productTable.setBackground(bgColor);
+            productTable.setForeground(textColor);
+            productTable.setGridColor(darkMode ? DARK_BORDER : Color.LIGHT_GRAY);
+            
+            historyTable.setBackground(bgColor);
+            historyTable.setForeground(textColor);
+            historyTable.setGridColor(darkMode ? DARK_BORDER : Color.LIGHT_GRAY);
+            
+            // Force repaint of all components
+            frame.revalidate();
+            frame.repaint();
+        }
+    }
+    
+    private void applyDarkModeToComponent(Component component, Color bgColor, Color textColor, Color accentColor, Color panelBgColor) {
+        if (component instanceof JPanel) {
+            JPanel panel = (JPanel) component;
+            panel.setBackground(panelBgColor);
+            panel.setBorder(BorderFactory.createLineBorder(darkMode ? DARK_BORDER : Color.LIGHT_GRAY));
+            
+            for (Component child : panel.getComponents()) {
+                applyDarkModeToComponent(child, bgColor, textColor, accentColor, panelBgColor);
+            }
+        } else if (component instanceof JLabel) {
+            ((JLabel)component).setForeground(textColor);
+        } else if (component instanceof JButton) {
+            JButton button = (JButton) component;
+            button.setBackground(accentColor);
+            button.setForeground(Color.WHITE);
+            button.setBorder(BorderFactory.createLineBorder(darkMode ? DARK_BORDER : Color.LIGHT_GRAY));
+        } else if (component instanceof JTextField || component instanceof JSpinner) {
+            component.setBackground(panelBgColor);
+            component.setForeground(textColor);
+        } else if (component instanceof JList) {
+            ((JList<?>)component).setBackground(panelBgColor);
+            ((JList<?>)component).setForeground(textColor);
+        } else if (component instanceof JScrollPane) {
+            component.setBackground(bgColor);
+            ((JScrollPane)component).getViewport().setBackground(panelBgColor);
+        }
+    }
+
     private void showMainScreen() {
-        products = new ArrayList<>();
+        loadProductsFromFile();
         cart = new ArrayList<>();
         validCoupons = new HashMap<>();
 
-        // Initialize valid coupons
-        validCoupons.put("D5", 10.0); // 5% discount
-        validCoupons.put("D10", 20.0); // 10% discount
-        validCoupons.put("D15", 10.0); // 15% discount
+        // Initialize valid coupons with correct discount percentages
+        validCoupons.put("D5", 5.0); // 5% discount
+        validCoupons.put("D10", 10.0); // 10% discount
+        validCoupons.put("D15", 15.0); // 15% discount
         validCoupons.put("D20", 20.0); // 20% discount
-        validCoupons.put("D25", 10.0); // 25% discount
-        validCoupons.put("D30", 20.0); // 30% discount
-        validCoupons.put("D35", 10.0); // 35% discount
-        validCoupons.put("D40", 20.0); // 40% discount
-        validCoupons.put("D45", 10.0); // 45% discount
-        validCoupons.put("D50", 20.0); // 50% discount
+        validCoupons.put("D25", 25.0); // 25% discount
+        validCoupons.put("D30", 30.0); // 30% discount
+        validCoupons.put("D35", 35.0); // 35% discount
+        validCoupons.put("D40", 40.0); // 40% discount
+        validCoupons.put("D45", 45.0); // 45% discount
+        validCoupons.put("D50", 50.0); // 50% discount
         // Add more coupons as needed
 
         // Sample products with stock levels
@@ -467,6 +699,20 @@ public class OnlineShoppingGUI {
         // Profile Panel
         JPanel profilePanel = new JPanel();
         profilePanel.setLayout(new BoxLayout(profilePanel, BoxLayout.Y_AXIS));
+        
+        // Add dark mode toggle
+        JCheckBox darkModeToggle = new JCheckBox("Dark Mode");
+        darkModeToggle.setSelected(darkMode);
+        darkModeToggle.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                User currentUser = getUser(loggedInUser);
+                if (currentUser != null) {
+                    currentUser.darkMode = darkModeToggle.isSelected();
+                    applyDarkMode();
+                }
+            }
+        });
 
         JTextField usernameField = new JTextField(loggedIn.username);
         JTextField genderField = new JTextField(loggedIn.gender);
@@ -484,18 +730,32 @@ public class OnlineShoppingGUI {
         profilePanel.add(ageField);
         profilePanel.add(new JLabel("Phone Number:"));
         profilePanel.add(phoneField);
+        profilePanel.add(darkModeToggle);
 
         JButton saveButton = new JButton("Save Changes");
-        saveButton.addActionListener(e -> {
-            loggedIn.username = usernameField.getText();
-            loggedIn.gender = genderField.getText();
-            loggedIn.country = countryField.getText();
-            loggedIn.age = Integer.parseInt(ageField.getText());
-            loggedIn.phoneNumber = phoneField.getText();
-            JOptionPane.showMessageDialog(frame, "Profile updated successfully!");
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loggedIn.username = usernameField.getText();
+                loggedIn.gender = genderField.getText();
+                loggedIn.country = countryField.getText();
+                loggedIn.age = Integer.parseInt(ageField.getText());
+                loggedIn.phoneNumber = phoneField.getText();
+                JOptionPane.showMessageDialog(frame, "Profile updated successfully!");
+            }
+        });
+
+        JButton darkModeButton = new JButton("Toggle Dark Mode");
+        darkModeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                darkMode = !darkMode;
+                applyDarkMode();
+            }
         });
 
         profilePanel.add(saveButton);
+        profilePanel.add(darkModeButton);
         dashboardContent.add(profilePanel);
 
         // Address Panel (updated)
@@ -508,19 +768,25 @@ public class OnlineShoppingGUI {
         JButton signOutButton = new JButton("Sign Out");
         signOutButton.setBackground(new Color(220, 20, 60));
         signOutButton.setForeground(Color.WHITE);
-        signOutButton.addActionListener(e -> {
-            frame.dispose();
-            showLoginScreen();
+        signOutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+                showLoginScreen();
+            }
         });
         signOutPanel.add(signOutButton);
         dashboardContent.add(signOutPanel);
 
         // Toggle Button Action
-        toggleButton.addActionListener(e -> {
-            dashboardContent.setVisible(!dashboardContent.isVisible());
-            toggleButton.setText(dashboardContent.isVisible() ? "Hide Dashboard" : "Show Dashboard");
-            dashboardPanel.revalidate();
-            dashboardPanel.repaint();
+        toggleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dashboardContent.setVisible(!dashboardContent.isVisible());
+                toggleButton.setText(dashboardContent.isVisible() ? "Hide Dashboard" : "Show Dashboard");
+                dashboardPanel.revalidate();
+                dashboardPanel.repaint();
+            }
         });
 
         dashboardPanel.add(toggleButton);
@@ -541,9 +807,24 @@ public class OnlineShoppingGUI {
         JButton removeFromCartButton = new JButton("Remove from Cart");
         JButton checkoutButton = new JButton("Checkout");
 
-        addToCartButton.addActionListener(e -> addToCart());
-        removeFromCartButton.addActionListener(e -> removeFromCart());
-        checkoutButton.addActionListener(e -> checkout());
+        addToCartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addToCart();
+            }
+        });
+        removeFromCartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeFromCart();
+            }
+        });
+        checkoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkout();
+            }
+        });
 
         JPanel cartPanel = new JPanel(new BorderLayout());
         cartPanel.add(new JScrollPane(cartList), BorderLayout.CENTER);
@@ -560,7 +841,7 @@ public class OnlineShoppingGUI {
         JPanel couponPanel = new JPanel();
         couponField = new JTextField(15);
         JButton applyCouponButton = new JButton("Apply Coupon");
-        applyCouponButton.addActionListener(e -> applyCoupon());
+        applyCouponButton.addActionListener((ActionEvent e) -> applyCoupon());
         couponPanel.add(new JLabel("Coupon Code:"));
         couponPanel.add(couponField);
         couponPanel.add(applyCouponButton);
@@ -583,7 +864,7 @@ public class OnlineShoppingGUI {
         searchPanel.add(searchButton);
         searchPanel.add(resetButton);
 
-        searchButton.addActionListener(e -> {
+        searchButton.addActionListener((ActionEvent e) -> {
             String nameText = nameField.getText().trim().toLowerCase();
             String minText = minPriceField.getText().trim();
             String maxText = maxPriceField.getText().trim();
@@ -601,7 +882,7 @@ public class OnlineShoppingGUI {
             }
         });
 
-        resetButton.addActionListener(e -> {
+        resetButton.addActionListener((ActionEvent e) -> {
             nameField.setText("");
             minPriceField.setText("");
             maxPriceField.setText("");
@@ -609,10 +890,43 @@ public class OnlineShoppingGUI {
             loadProducts();
         });
 
+        // Purchase History Panel
+        historyModel = new DefaultTableModel(new String[]{"Date", "Items", "Total", "Payment"}, 0);
+        historyTable = new JTable(historyModel);
+        historyScroll = new JScrollPane(historyTable);
+        historyScroll.setPreferredSize(new Dimension(400, 200));
+        
+        // Toggle for Purchase History
+        JButton historyToggleButton = new JButton("Hide History");
+        historyToggleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                historyScroll.setVisible(!historyScroll.isVisible());
+                historyToggleButton.setText(historyScroll.isVisible() ? "Hide History" : "Show History");
+                frame.revalidate();
+                frame.repaint();
+            }
+        });
+        
         // Layout
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(dashboardPanel, BorderLayout.WEST);
-        mainPanel.add(new JScrollPane(productTable), BorderLayout.CENTER);
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        
+        // Add dashboard to top of left panel
+        leftPanel.add(dashboardPanel, BorderLayout.NORTH);
+        
+        // Add history panel below dashboard
+        JPanel historyPanel = new JPanel(new BorderLayout());
+        historyPanel.add(historyToggleButton, BorderLayout.NORTH);
+        historyPanel.add(historyScroll, BorderLayout.CENTER);
+        leftPanel.add(historyPanel, BorderLayout.CENTER);
+        
+        // Add product table to center
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(new JScrollPane(productTable), BorderLayout.CENTER);
+        
+        mainPanel.add(leftPanel, BorderLayout.WEST);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(cartPanel, BorderLayout.EAST);
         mainPanel.add(couponPanel, BorderLayout.NORTH);
         mainPanel.add(searchPanel, BorderLayout.SOUTH);
@@ -638,9 +952,9 @@ public class OnlineShoppingGUI {
         JButton removeProductButton = new JButton("Remove Product");
         JButton modifyPriceButton = new JButton("Modify Product Price");
 
-        addProductButton.addActionListener(e -> showAddProductScreen());
-        removeProductButton.addActionListener(e -> showRemoveProductScreen());
-        modifyPriceButton.addActionListener(e -> showModifyPriceScreen());
+        addProductButton.addActionListener((ActionEvent e) -> showAddProductScreen());
+        removeProductButton.addActionListener((ActionEvent e) -> showRemoveProductScreen());
+        modifyPriceButton.addActionListener((ActionEvent e) -> showModifyPriceScreen());
 
         sellerPanel.add(addProductButton);
         sellerPanel.add(removeProductButton);
@@ -670,15 +984,35 @@ public class OnlineShoppingGUI {
         JTextField productStockField = new JTextField(15);
         JButton addButton = new JButton("Add Product");
 
-        addButton.addActionListener(e -> {
-            String name = productNameField.getText();
-            double price = Double.parseDouble(productPriceField.getText());
-            int stock = Integer.parseInt(productStockField.getText());
+        addButton.addActionListener(event -> {
+            try {
+                String name = productNameField.getText().trim();
+                if (name.isEmpty()) {
+                    JOptionPane.showMessageDialog(addProductFrame, "Product name cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                double price = Double.parseDouble(productPriceField.getText());
+                int stock = Integer.parseInt(productStockField.getText());
+                
+                if (price <= 0) {
+                    JOptionPane.showMessageDialog(addProductFrame, "Price must be positive", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                if (stock < 0) {
+                    JOptionPane.showMessageDialog(addProductFrame, "Stock cannot be negative", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-            products.add(new Product(products.size() + 1, name, price, stock));
-            loadProducts();
-            JOptionPane.showMessageDialog(addProductFrame, "Product added successfully!");
-            addProductFrame.dispose();
+                products.add(new Product(products.size() + 1, name, price, stock));
+                loadProducts();
+                refreshAllProductViews();
+                JOptionPane.showMessageDialog(addProductFrame, "Product added successfully!");
+                addProductFrame.dispose();
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(addProductFrame, "Invalid number format for price or stock", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         gbc.gridx = 0;
@@ -720,6 +1054,7 @@ public class OnlineShoppingGUI {
         if (selectedProduct != null) {
             products.removeIf(product -> product.getName().equals(selectedProduct));
             loadProducts();
+            refreshAllProductViews();
             JOptionPane.showMessageDialog(frame, "Product removed successfully!");
         }
     }
@@ -738,9 +1073,10 @@ public class OnlineShoppingGUI {
                 if (product.getName().equals(selectedProduct)) {
                     String newPrice = JOptionPane.showInputDialog(frame, "Enter new price for " + product.getName());
                     try {
-                        product.setPrice(Double.parseDouble(newPrice));
-                        loadProducts();
-                        JOptionPane.showMessageDialog(frame, "Price updated successfully!");
+                    product.setPrice(Double.parseDouble(newPrice));
+                    loadProducts();
+                    refreshAllProductViews();
+                    JOptionPane.showMessageDialog(frame, "Price updated successfully!");
                     } catch (NumberFormatException e) {
                         JOptionPane.showMessageDialog(frame, "Invalid price format!", "Error", JOptionPane.ERROR_MESSAGE);
                     }
@@ -748,6 +1084,28 @@ public class OnlineShoppingGUI {
                 }
             }
         }
+    }
+
+    private void updatePurchaseHistory() {
+        historyModel.setRowCount(0);
+        
+        for (Purchase purchase : purchases) {
+            if (purchase.customer.equals(loggedInUser)) {
+                historyModel.addRow(new Object[]{
+                    purchase.getFormattedDate(),
+                    purchase.getItemsSummary(),
+                    String.format("$%.2f", purchase.total),
+                    purchase.paymentMethod
+                });
+            }
+        }
+    }
+
+    private void refreshAllProductViews() {
+        // This would notify all active sessions to refresh their product views
+        // In a real application, this would use a server push or websocket
+        // For this demo, we'll just reload products for the current user
+        loadProducts();
     }
 
     private void loadProducts() {
@@ -848,12 +1206,15 @@ public class OnlineShoppingGUI {
                     "Payment", JOptionPane.QUESTION_MESSAGE, null, paymentOptions, paymentOptions[0]);
 
             if (selectedPayment != null) {
-                // Deduct stock for each product in the cart
-                for (Product product : cart) {
-                    product.reduceStock(1); // Deduct stock after checkout
-                }
+                // Stock was already reduced when adding to cart
+                // No need to reduce again during checkout
                 receipt.append("\nPayment Method: ").append(selectedPayment);
                 JOptionPane.showMessageDialog(frame, receipt.toString(), "Checkout", JOptionPane.INFORMATION_MESSAGE);
+                
+                // Record the purchase
+                purchases.add(new Purchase(loggedInUser, new ArrayList<>(cart), total, selectedPayment));
+                updatePurchaseHistory();
+                
                 cart.clear(); // Clear the cart after checkout
                 cartModel.clear(); // Clear the cart model
                 loadProducts(); // Reload products to update stock display
