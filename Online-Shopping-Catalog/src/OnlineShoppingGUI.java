@@ -642,7 +642,7 @@ public class OnlineShoppingGUI {
             // If file doesn't exist or error occurs, start with default products
             products = new ArrayList<>();
             products.add(new Product(101, "Laptop", 1200.00, 5));
-            products.add(new Product(102, "Smartphone", 800.00, 0));
+            products.add(new Product(102, "Smartphone", 800.00, 5));
         }
     }
 
