@@ -870,7 +870,7 @@ public class OnlineShoppingGUI {
         dashboardPanel.add(dashboardContent);
 
         // Product Table
-        String[] columns = {"ID", "Name", "Price", "Stock"};
+        String[] columns = {"ID", "Name", "Category", "Price", "Stock", "Rating"};
         productTableModel = new DefaultTableModel(columns, 0);
         productTable = new JTable(productTableModel);
         loadProducts();
@@ -928,25 +928,31 @@ public class OnlineShoppingGUI {
         couponPanel.add(applyCouponButton);
 
         // Search Panel
-        JPanel searchPanel = new JPanel(new GridLayout(2, 4, 5, 5));
+        JPanel searchPanel = new JPanel(new GridLayout(3, 4, 5, 5));
         JTextField nameField = new JTextField();
+        JComboBox<String> categoryCombo = new JComboBox<>(new String[]{"All", "Electronics", "Clothing", "Home", "Books", "Other"});
         JTextField minPriceField = new JTextField();
         JTextField maxPriceField = new JTextField();
         JButton searchButton = new JButton("Search");
         JButton resetButton = new JButton("Reset");
+        JButton saleButton = new JButton("Sale Items");
 
         searchPanel.setBorder(BorderFactory.createTitledBorder("Search Products"));
         searchPanel.add(new JLabel("Name:"));
         searchPanel.add(nameField);
+        searchPanel.add(new JLabel("Category:"));
+        searchPanel.add(categoryCombo);
         searchPanel.add(new JLabel("Min Price:"));
         searchPanel.add(minPriceField);
         searchPanel.add(new JLabel("Max Price:"));
         searchPanel.add(maxPriceField);
         searchPanel.add(searchButton);
         searchPanel.add(resetButton);
+        searchPanel.add(saleButton);
 
         searchButton.addActionListener((ActionEvent e) -> {
             String nameText = nameField.getText().trim().toLowerCase();
+            String categoryText = (String)categoryCombo.getSelectedItem();
             String minText = minPriceField.getText().trim();
             String maxText = maxPriceField.getText().trim();
 
@@ -955,10 +961,44 @@ public class OnlineShoppingGUI {
 
             productTableModel.setRowCount(0); // clear table
             for (Product p : products) {
-                if (p.getName().toLowerCase().contains(nameText)
-                        && p.getPrice() >= min
-                        && p.getPrice() <= max) {
-                    productTableModel.addRow(new Object[]{p.getId(), p.getName(), p.getPrice(), p.getStock()});
+                boolean categoryMatch = categoryText.equals("All") || p.getCategory().equalsIgnoreCase(categoryText);
+                boolean nameMatch = p.getName().toLowerCase().contains(nameText);
+                boolean priceMatch = p.getPrice() >= min && p.getPrice() <= max;
+                
+                if (categoryMatch && nameMatch && priceMatch) {
+                    String formattedPrice = String.format("$%.2f", p.getPrice());
+                    String stockDisplay = p.needsRestock() ? 
+                        "<html><font color='red'>" + p.getStock() + " (Low!)</font></html>" : 
+                        String.valueOf(p.getStock());
+                    String ratingDisplay = p.getReviewCount() > 0 ? 
+                        String.format("%.1f (%d)", p.getAverageRating(), p.getReviewCount()) : 
+                        "No reviews";
+                        
+                    productTableModel.addRow(new Object[]{
+                        p.getId(), 
+                        p.getName(), 
+                        p.getCategory(),
+                        formattedPrice, 
+                        stockDisplay,
+                        ratingDisplay
+                    });
+                }
+            }
+        });
+
+        saleButton.addActionListener((ActionEvent e) -> {
+            productTableModel.setRowCount(0);
+            for (Product p : products) {
+                if (p.getPrice() < p.getOriginalPrice()) {
+                    String formattedPrice = String.format("$%.2f (was $%.2f)", p.getPrice(), p.getOriginalPrice());
+                    productTableModel.addRow(new Object[]{
+                        p.getId(), 
+                        p.getName(), 
+                        p.getCategory(),
+                        formattedPrice, 
+                        p.getStock(),
+                        String.format("%.1f (%d)", p.getAverageRating(), p.getReviewCount())
+                    });
                 }
             }
         });
@@ -1210,11 +1250,27 @@ public class OnlineShoppingGUI {
         for (Product product : products) {
             // Format the price with a dollar sign
             String formattedPrice = String.format("$%.2f", product.getPrice());
-            Object[] row = {product.getId(), product.getName(), formattedPrice, product.getStock()};
-            System.out.println("Loading product: " + product.getName() + " stock=" + product.getStock());
+            String stockDisplay = product.needsRestock() ? 
+                "<html><font color='red'>" + product.getStock() + " (Low!)</font></html>" : 
+                String.valueOf(product.getStock());
+                
+            String ratingDisplay = product.getReviewCount() > 0 ? 
+                String.format("%.1f (%d)", product.getAverageRating(), product.getReviewCount()) : 
+                "No reviews";
+                
+            Object[] row = {
+                product.getId(), 
+                product.getName(), 
+                product.getCategory(),
+                formattedPrice, 
+                stockDisplay,
+                ratingDisplay
+            };
             productTableModel.addRow(row);
         }
-        productTableModel.fireTableDataChanged(); // Force table refresh
+        // Force full table refresh including column resizing
+        productTableModel.fireTableDataChanged();
+        productTable.setModel(productTableModel);
     }
 
     private void addToCart() {
